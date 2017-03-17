@@ -74,3 +74,8 @@ node_modules/
 phpunit.phar
 # local phpunit config
 /phpunit.xml
+
+# Config files
+# =========================
+/config.php
+/bin/
