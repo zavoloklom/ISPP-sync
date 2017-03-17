@@ -41,10 +41,10 @@ class Synchronization
     try {
       $local_connection = new Connection($config['local_server']['adapter'], $config['local_server']['options'], 'local');
       $this->local_connection = new QueryBuilderHandler($local_connection);
-      echo "Соединение с сервером ИС ПП успешно установлено\n";
+      echo 'Соединение с сервером ИС ПП успешно установлено'.PHP_EOL;
       $localConnect = true;
     } catch (\Exception $e) {
-      echo 'Не удалось установить соединение с сервером ИС ПП: ',  $e->getMessage(), "\n";
+      echo 'Не удалось установить соединение с сервером ИС ПП: ',  $e->getMessage(), ''.PHP_EOL;
     }
 
     // Установка соединения с веб сервером
@@ -52,15 +52,15 @@ class Synchronization
     try {
       $web_connection = new Connection($config['web_server']['adapter'], $config['web_server']['options'], 'web');
       $this->web_connection = new QueryBuilderHandler($web_connection);
-      echo "Соединение с веб сервером успешно установлено\n";
+      echo 'Соединение с веб сервером успешно установлено'.PHP_EOL;
       $serverConnect = true;
     } catch (\Exception $e) {
-      echo 'Не удалось установить соединение с веб сервером: ',  $e->getMessage(), "\n";
+      echo 'Не удалось установить соединение с веб сервером: ',  $e->getMessage(), PHP_EOL;
     }
 
     if (($localConnect && $serverConnect) === false) {
       $this->notify->connectionError($localConnect, $serverConnect);
-      exit("Синхронизация невозможна\n");
+      exit('Синхронизация невозможна'.PHP_EOL);
     };
   }
 
@@ -69,7 +69,7 @@ class Synchronization
    */
   public function groups()
   {
-    echo "\nСинхронизация идентификаторов групп\n";
+    echo '\nСинхронизация идентификаторов групп'.PHP_EOL;
 
     $query = $this->local_connection
       ->table('clients_groups')
@@ -81,25 +81,25 @@ class Synchronization
     $errors = 0;
     foreach ($groups as $group) {
       try {
-        //$this->serverDb->createCommand("UPDATE `ispp_group` SET `system_id` = ".$group['IdOfClientsGroup']." WHERE `ispp_group`.`name` = '".$group['Name']."'")->execute();
-        echo ".";
+        //$this->serverDb->createCommand('UPDATE `ispp_group` SET `system_id` = '.$group['IdOfClientsGroup'].' WHERE `ispp_group`.`name` = ''.$group['Name'].''')->execute();
+        echo '.';
       } catch (\Exception $e) {
-        echo "X";
+        echo 'X';
         $errors++;
       }
     }
 
-    echo "\n\n Количество групп ".$query->count();
+    echo '\n\n Количество групп '.$query->count();
 
     // Запись в таблицу синхронизаций
     try {
-      //$this->serverDb->createCommand()->insert('{{%ispp_sync}}', ['action'=>'update-groups', 'errors'=> $errors, 'datetime'=>date("Y-m-d H:i:s")])->execute();
-      echo "\nЗапись в таблицу синхронизаций прошла успешно";
+      //$this->serverDb->createCommand()->insert('{{%ispp_sync}}', ['action'=>'update-groups', 'errors'=> $errors, 'datetime'=>date('Y-m-d H:i:s')])->execute();
+      echo '\nЗапись в таблицу синхронизаций прошла успешно';
     } catch (\Exception $e) {
-      echo "\nЗапись в таблицу синхронизаций не удалась";
+      echo '\nЗапись в таблицу синхронизаций не удалась';
     }
 
-    echo "\nСинхронизация идентификаторов групп выполнена\n";
+    echo '\nСинхронизация идентификаторов групп выполнена'.PHP_EOL;
   }
 
   /**
@@ -107,7 +107,7 @@ class Synchronization
    */
   public function students()
   {
-    echo "Students Action";
+    echo 'Students Action';
   }
 
   /**
@@ -115,7 +115,7 @@ class Synchronization
    */
   public function events()
   {
-    echo "Events Action";
+    echo 'Events Action';
   }
 
   /**

@@ -32,9 +32,9 @@ class SlackNotification
     // Инициализация Slack клиента
     try {
       $this->client = new Client($config['slack']['webhook'], $config['slack']['options']);
-      echo "Соединение со Slack сервисом успешно установлено\n\n";
+      echo 'Соединение со Slack сервисом успешно установлено'.PHP_EOL.PHP_EOL;
     } catch (\Exception $e) {
-      echo "Не удалось установить соединение со Slack сервисом: ",  $e->getMessage(), "\n";
+      echo 'Не удалось установить соединение со Slack сервисом: ',  $e->getMessage(), PHP_EOL;
     }
 
     // Загрузка конфигурации
