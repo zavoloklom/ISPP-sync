@@ -42,7 +42,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-
 # JetBrains
 # =========================
 .idea/
@@ -70,12 +69,19 @@ node_modules/
 # =========================
 /.vagrant
 
-# phpunit itself is not needed
-phpunit.phar
-# local phpunit config
-/phpunit.xml
-
 # Config files
 # =========================
 /config.php
 /bin/
+
+# Log files
+# =========================
+/logs/
+
+# Tests
+# =========================
+# phpunit itself is not needed
+phpunit.phar
+# local phpunit config
+/phpunit.xml
+tests/_output/*
