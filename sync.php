@@ -30,15 +30,11 @@ $actions = [
 $options = [];
 
 // Проверка корректности действий и установка действия по умолчанию
-if (count($argv)>=2) {
-  foreach ($actions as $action) {
-    if ($argv[1] == $action) {
-      // Make connection
-      $connection = new \zavoloklom\ispp\sync\src\Synchronization($config);
-      $connection->$action();
-      exit();
-    }
-  }
+if ($argc >= 2 && in_array($argv[1], $actions)) {
+  $action = $argv[1];
+  // Make connection
+  $connection = new \zavoloklom\ispp\sync\src\Synchronization($config);
+  $connection->$action();
+} else {
+  $helper->printHelp();
 }
-$helper->printHelp();
-echo "\n";
