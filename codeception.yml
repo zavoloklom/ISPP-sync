@@ -15,7 +15,10 @@ extensions:
 modules:
     config:
         Db:
-            dsn: ''
-            user: ''
-            password: ''
-            dump: tests/_data/dump.sql
+          dsn: 'mysql:host=127.0.0.1'
+          user: 'root'
+          password: ''
+          dump: 'tests/_data/dump.sql'
+          populate: true
+          cleanup: false
+          reconnect: false
