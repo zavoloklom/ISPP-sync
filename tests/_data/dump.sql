@@ -190,9 +190,9 @@ CREATE TABLE `ispp-ecafe-test`.`guardians` (
   PRIMARY KEY (IdOfRecord),
   UNIQUE INDEX Guardian_Child_Unique_Indx (GuardianClientId, ChildClientId),
   CONSTRAINT ChildClient_fk FOREIGN KEY (ChildClientId)
-  REFERENCES clients(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  REFERENCES `ispp-ecafe-test`.`clients`(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT GuardianClient_fk FOREIGN KEY (GuardianClientId)
-  REFERENCES clients(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION
+  REFERENCES `ispp-ecafe-test`.`clients`(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
   ENGINE = INNODB
   AUTO_INCREMENT = 3995
@@ -225,9 +225,9 @@ CREATE TABLE `ispp-ecafe-test`.`enterevents` (
   UNIQUE INDEX EventHash_UNIQUE (EventHash),
   INDEX IX_enterevents_EvtDateTime (EvtDateTime),
   CONSTRAINT ChildPassChecker_FK1 FOREIGN KEY (ChildPassCheckerId)
-  REFERENCES clients(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  REFERENCES `ispp-ecafe-test`.`clients`(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT PassWithGuardian_FK1 FOREIGN KEY (PassWithGuardian)
-  REFERENCES clients(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION
+  REFERENCES `ispp-ecafe-test`.`clients`(IdOfClient) ON DELETE NO ACTION ON UPDATE NO ACTION
 )
   ENGINE = INNODB
   AUTO_INCREMENT = 745349
@@ -258,11 +258,11 @@ CREATE TABLE `ispp-ecafe-test`.`cards` (
   IsAlien BIT(1) NOT NULL DEFAULT b'0' COMMENT 'Признак карты мигранта',
   PRIMARY KEY (IdOfCard),
   CONSTRAINT cards_FK1 FOREIGN KEY (IdOfClient)
-  REFERENCES clients(IdOfClient) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT FK_cards_accounts_IdOfAccount FOREIGN KEY (IdOfAccount)
-  REFERENCES accounts(IdOfAccount) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT FK_cards_visitors_IdOfVisitor FOREIGN KEY (IdOfVisitor)
-  REFERENCES visitors(IdOfVisitor) ON DELETE RESTRICT ON UPDATE CASCADE
+  REFERENCES `ispp-ecafe-test`.`clients`(IdOfClient) ON DELETE RESTRICT ON UPDATE RESTRICT
+  -- CONSTRAINT FK_cards_accounts_IdOfAccount FOREIGN KEY (IdOfAccount)
+  -- REFERENCES `ispp-ecafe-test`.`accounts`(IdOfAccount) ON DELETE RESTRICT ON UPDATE CASCADE,
+  -- CONSTRAINT FK_cards_visitors_IdOfVisitor FOREIGN KEY (IdOfVisitor)
+  -- REFERENCES `ispp-ecafe-test`.`visitors`(IdOfVisitor) ON DELETE RESTRICT ON UPDATE CASCADE
 )
   ENGINE = INNODB
   AVG_ROW_LENGTH = 282
@@ -286,11 +286,11 @@ CREATE TABLE IF NOT EXISTS `ispp-iseduc-test`.`ispp_branch` (
   `img` varchar(255) NOT NULL,
   `bg_color` varchar(32) NOT NULL,
   `head_id` int(11) DEFAULT NULL COMMENT 'FK for #__profile table',
-  `created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created` datetime NOT NULL,
   `created_by` int(11) NOT NULL DEFAULT '0',
-  `modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `modified` datetime NOT NULL,
   `modified_by` int(11) NOT NULL DEFAULT '0',
-  `checked` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `checked` datetime NOT NULL,
   `checked_by` int(11) NOT NULL DEFAULT '0',
   `state` smallint(3) NOT NULL DEFAULT '1' COMMENT 'Visibility: 0 - hide, 1 - publish',
   `ordering` int(11) unsigned NOT NULL DEFAULT '0',
@@ -309,11 +309,11 @@ CREATE TABLE IF NOT EXISTS `ispp-iseduc-test`.`ispp_group` (
   `description` text NOT NULL,
   `branch_id` int(11) DEFAULT NULL COMMENT 'FK for #__ispp_branch table',
   `teacher_id` int(11) DEFAULT NULL COMMENT 'FK for #__profile table',
-  `created` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `created` datetime NOT NULL,
   `created_by` int(11) NOT NULL DEFAULT '0',
-  `modified` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `modified` datetime NOT NULL,
   `modified_by` int(11) NOT NULL DEFAULT '0',
-  `checked` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `checked` datetime NOT NULL,
   `checked_by` int(11) NOT NULL DEFAULT '0',
   `state` smallint(3) NOT NULL DEFAULT '1' COMMENT 'Visibility: 0 - hide, 1 - publish',
   `ordering` int(11) unsigned NOT NULL DEFAULT '0',
