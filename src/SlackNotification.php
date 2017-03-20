@@ -7,6 +7,7 @@
 
 namespace zavoloklom\ispp\sync\src;
 
+use GuzzleHttp\Exception\ConnectException;
 use Maknz\Slack\Client;
 
 /**
@@ -18,23 +19,30 @@ class SlackNotification
 {
 
   /** @var Client */
-  private $client;
+  private $slack;
 
   /** @var array */
   private $config;
 
-  /**
-   * SlackNotification constructor.
-   * @param array $config
-   */
+
   public function __construct(array $config)
   {
     // Инициализация Slack клиента
-    try {
-      $this->client = new Client($config['slack']['webhook'], $config['slack']['options']);
-      echo 'Соединение со Slack сервисом успешно установлено'.PHP_EOL.PHP_EOL;
-    } catch (\Exception $e) {
-      echo 'Не удалось установить соединение со Slack сервисом: ',  $e->getMessage(), PHP_EOL;
+    if (array_key_exists('webhook', $config)) {
+      $webhook = $config['webhook'];
+      $options = array_key_exists('options', $config) ? $config['options'] : [];
+
+      $this->slack = new Client($webhook, $options);
+
+      // Проверка корректности URI
+      $guzzle = new \GuzzleHttp\Client();
+      try {
+        $guzzle->head($webhook);
+      } catch(ConnectException $e) {
+        throw new \Exception('Не удалось установить соединение со Slack сервисом.', $e->getCode(), $e);
+      }
+    } else {
+      throw new \Exception('Не установлено значение для webhook.');
     }
 
     // Загрузка конфигурации
@@ -47,7 +55,7 @@ class SlackNotification
    */
   public function connectionError($localConnect, $serverConnect)
   {
-    $message = $this->client->createMessage();
+    $message = $this->slack->createMessage();
     $message
       ->setText('Не удалось синхронизировать данные')
       ->setAttachments([[
