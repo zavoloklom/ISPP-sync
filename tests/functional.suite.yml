@@ -4,8 +4,17 @@
 # Emulate web requests and make application process them
 # Include one of framework modules (Symfony2, Yii2, Laravel5) to use it
 
+# DB in DSN config will cleanup after each test
+
 class_name: FunctionalTester
 modules:
     enabled:
-        - Db
+        - Db:
+            dsn: 'mysql:host=127.0.0.1;dbname=ispp-iseduc-test'
+            user: 'root'
+            password: ''
+            dump: 'tests/_data/dump.sql'
+            populate: true
+            cleanup: true
+            reconnect: true
         - \Helper\Functional
