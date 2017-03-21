@@ -9,6 +9,7 @@ namespace zavoloklom\ispp\sync\src;
 
 use Pixie\Connection;
 use Pixie\QueryBuilder\QueryBuilderHandler;
+use zavoloklom\ispp\sync\src\models\ISPPQuery;
 
 /**
  * Class Synchronization
@@ -29,7 +30,7 @@ class Synchronization
   /** @var array */
   public $config;
 
-  /** @var QueryBuilderHandler */
+  /** @var ISPPQuery */
   private $local_connection;
 
   /** @var QueryBuilderHandler */
@@ -45,17 +46,19 @@ class Synchronization
   public function __construct(array $config = [])
   {
     // Инициализация уведомлений
-    if (array_key_exists('slack', $config) && is_array($config['slack']) && $this->notify = new SlackNotification($config['slack'])) {
-      $this->notificationEnabled = true;
-    }
+    $this->setupNotifications($config);
 
-    if (!$this->config) {$this->config = $config;}
+    // Инициализация соединений
+    $this->setupConnections($config);
+
+    // Запись конфигурации
+    //if (!$this->config) {$this->config = $config;}
   }
 
   /**
-   * @return QueryBuilderHandler
+   * @return ISPPQuery
    */
-  public function getLocalConnection(): QueryBuilderHandler
+  public function getLocalConnection()
   {
     return $this->local_connection;
   }
@@ -63,9 +66,17 @@ class Synchronization
   /**
    * @return QueryBuilderHandler
    */
-  public function getWebConnection(): QueryBuilderHandler
+  public function getWebConnection()
   {
     return $this->web_connection;
+  }
+
+
+  private function setupNotifications(array $config = [])
+  {
+    if (array_key_exists('slack', $config) && is_array($config['slack']) && $this->notify = new SlackNotification($config['slack'])) {
+      $this->notificationEnabled = true;
+    }
   }
 
   /**
@@ -79,7 +90,7 @@ class Synchronization
   {
     try {
       $connection = new Connection($config['adapter'], $config['options'], $alias);
-      $this->local_connection = new QueryBuilderHandler($connection);
+      $this->local_connection = new ISPPQuery($connection);
       echo 'Соединение с сервером ИС ПП успешно установлено', PHP_EOL;
       return true;
     } catch (\Exception $e) {
@@ -114,7 +125,7 @@ class Synchronization
    * @param array $config
    * @throws \Exception
    */
-  private function setupConnections(array $config)
+  private function setupConnections(array $config = [])
   {
     $localConnect  = array_key_exists('local_server', $config) ? $this->setupLocalConnection($config['local_server']) : false;
     $serverConnect = array_key_exists('web_server', $config)   ? $this->setupWebConnection($config['web_server']) : false;
@@ -132,9 +143,6 @@ class Synchronization
    */
   public function groups()
   {
-    // Установка соединений
-    $this->setupConnections($this->config);
-
     echo 'Синхронизация идентификаторов групп', PHP_EOL, PHP_EOL;
 
     /**
@@ -144,30 +152,31 @@ class Synchronization
      * GroupType - 1 (Учебные классы)
      * GroupType - 2 (Группы дет. сада)
      */
-    $queryLocalGroups = $this->local_connection
+    $localGroups = $this->local_connection
       ->table('clients_groups')
       ->select([
         'clients_groups.IdOfClientsGroup',
         'clients_groups.Name'
       ])
-      ->where('clients_groups.GroupType', '=', 1);
-    $localGroups = $queryLocalGroups->get();
+      ->where('clients_groups.GroupType', '=', 1)
+      ->get();
+    // $localGroups = ClientGroup::qb()->select([)->class()->get();
+
+    // Количество групп в веб версии
+    $webGroupsCount = $this->web_connection->table('ispp_group')->count();
+    // $webGroupsCount = IsppGroup::qb()->count();
+
+    // Посчитать количество скрытых групп на текущий момент
+    // Установить видимость 0 перед синхронизацией
+    $hiddenWebGroupsCount = $this->web_connection->table('ispp_group')->where('state', '=', 0)->count();
+    // $webGroupsCount = IsppGroup::qb()->hiddenScope()->count();
 
 
-    /**
-     * Выборка всех групп из таблицы системы
-     */
-    $queryWebGroups = $this->web_connection
-      ->table('ispp_group')
-      ->select([
-        'ispp_group.system_id',
-        'ispp_group.name'
-      ]);
-    $webGroups = $queryWebGroups->get();
+    $this->web_connection->table('ispp_group')->update(['state'=>0]);
+    // $webGroupsCount = IsppGroup::qb()->update(['state'=>0]);
 
     $errors = 0;
     foreach ($localGroups as $localGroup) {
-
       try {
         $webGroup = $this->web_connection
           ->table('ispp_group')
@@ -175,22 +184,23 @@ class Synchronization
           ->where('name', '=', $localGroup->Name)
           ->get();
 
-        if ($queryWebGroups->count() && $webGroup) {
+        if ($webGroupsCount && $webGroup) {
           $this->web_connection
             ->table('ispp_group')
             ->where('ispp_group.name', '=', $localGroup->Name)
             ->update([
               'system_id' => $localGroup->IdOfClientsGroup,
-              'state'=>3
+              'modified'  => date("Y-m-d H:i:s"),
+              'state'     => 1
             ]);
         } else {
           $this->web_connection
             ->table('ispp_group')
             ->insert([
               'system_id' => $localGroup->IdOfClientsGroup,
-              'name' => $localGroup->Name
+              'name'      => $localGroup->Name,
+              'created'   => date("Y-m-d H:i:s")
             ]);
-
         }
         echo '.';
       } catch (\Exception $e) {
@@ -198,19 +208,11 @@ class Synchronization
         $errors++;
       }
     }
+    echo PHP_EOL;
 
-
-    // $webGroups Все группы в веб базе
-
-    // если $webGroups равно 0, то для каждой $group делаем insert
-    // если  $webGroups не равно 0, то для каждой из $group проверяем
-    // select $group->Name
-    // если есть то update
-    // если нет то insert
-
-    // группы которые присутствуют в web таблице, но отсутствуют или имеют GroupType отличный от 1
-    // должны помечаться скрытыми или предлагающимися к удалению (во второй редакции)
-
+    // Количество созданных групп
+    // Количество обновленных групп
+    // Количество скрытых групп в процессе синхронизации $hiddenWebGroupsCount
     //echo 'Количество групп ', $query->count(), PHP_EOL;
 
     echo 'Синхронизация идентификаторов групп выполнена', PHP_EOL;
