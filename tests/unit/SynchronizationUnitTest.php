@@ -11,11 +11,35 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
   /** @var \UnitTester */
   protected $tester;
 
+  private $correctDbConfig;
+
   /**
    * @inheritdoc
    */
   protected function _before()
   {
+    $this->correctDbConfig = [
+      'local_server' => [
+        'adapter' => 'mysql',
+        'options' => [
+          'driver'    => 'mysql',
+          'host'      => '127.0.0.1',
+          'username'  => 'root',
+          'password'  => '',
+          'database'  => 'ispp-ecafe-test',
+        ],
+      ],
+      'web_server' => [
+        'adapter' => 'mysql',
+        'options' => [
+          'driver'    => 'mysql',
+          'host'      => '127.0.0.1',
+          'username'  => 'root',
+          'password'  => '',
+          'database'  => 'ispp-iseduc-test',
+        ],
+      ]
+    ];
   }
 
   /**
@@ -23,6 +47,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   protected function _after()
   {
+    $this->correctDbConfig = [];
   }
 
   /**
@@ -31,7 +56,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testNotificationsIsDisabledWhenSlackConfigDoesNotExist()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization(array_merge($this->correctDbConfig, []));
     $this->tester->assertFalse($sync->notificationEnabled);
   }
 
@@ -41,9 +66,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testNotificationsIsDisabledWhenSlackConfigIsNotArray()
   {
-    $sync = new Synchronization([
-      'slack' => false
-    ]);
+    $sync = new Synchronization(array_merge($this->correctDbConfig, ['slack' => false]));
     $this->tester->assertFalse($sync->notificationEnabled);
   }
 
@@ -54,9 +77,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
   public function testNotificationsThrowExceptionWhenSlackConfigIsEmpty()
   {
     $this->tester->expectException(new \Exception('Не установлено значение для webhook.'), function() {
-      new Synchronization([
-        'slack' => []
-      ]);
+      new Synchronization(array_merge($this->correctDbConfig, ['slack' => []]));
     });
   }
 
@@ -67,11 +88,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
   public function testNotificationsThrowExceptionWhenSlackWebhookUriIsWrong()
   {
     $this->tester->expectException(\Exception::class, function() {
-      new Synchronization([
-        'slack' => [
-          'webhook' => 'test.test'
-        ]
-      ]);
+      new Synchronization(array_merge($this->correctDbConfig, ['slack' => ['webhook' => 'test.test']]));
     });
   }
 
@@ -81,11 +98,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testNotificationsIsEnabledWhenSlackWebhookUriIsRight()
   {
-    $sync = new Synchronization([
-      'slack' => [
-        'webhook' => 'yandex.ru'
-      ]
-    ]);
+    $sync = new Synchronization(array_merge($this->correctDbConfig, ['slack' => ['webhook' => '127.0.0.1']]));
     $this->tester->assertTrue($sync->notificationEnabled);
   }
 
@@ -95,7 +108,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testLocalConnectionIsFalseWhenConfigIsEmpty()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization($this->correctDbConfig);
     $setupLocalConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupLocalConnection', [[]]);
     $this->tester->assertFalse($setupLocalConnection);
   }
@@ -106,7 +119,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testLocalConnectionIsFalseWhenConfigIsIncorrect()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization($this->correctDbConfig);
     $setupLocalConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupLocalConnection', [[
       'adapter' => 'mysql',
       'options' => [
@@ -125,7 +138,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testLocalConnectionIsTrueWhenConfigIsCorrect()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization($this->correctDbConfig);
     $setupLocalConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupLocalConnection', [[
       'adapter' => 'mysql',
       'options' => [
@@ -146,7 +159,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testWebConnectionIsFalseWhenConfigIsEmpty()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization($this->correctDbConfig);
     $setupWebConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupWebConnection', [[]]);
     $this->tester->assertFalse($setupWebConnection);
   }
@@ -157,7 +170,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testWebConnectionIsFalseWhenConfigIsIncorrect()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization($this->correctDbConfig);
     $setupWebConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupWebConnection', [[
       'adapter' => 'mysql',
       'options' => [
@@ -176,7 +189,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testWebConnectionIsTrueWhenConfigIsCorrect()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization($this->correctDbConfig);
     $setupWebConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupWebConnection', [[
       'adapter' => 'mysql',
       'options' => [
@@ -198,7 +211,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
   public function testSetupConnectionsThrowExceptionWhenConfigIsWrong()
   {
     $this->tester->expectException(\Exception::class, function() {
-      ReflectionHelper::invokePrivateMethod(new Synchronization(), 'setupConnections', [[
+      ReflectionHelper::invokePrivateMethod(new Synchronization($this->correctDbConfig), 'setupConnections', [[
         'local_server' => [
           'adapter' => 'mysql',
           'options' => [],
@@ -218,7 +231,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   public function testSetupConnectionsIsOKWhenConfigIsRight()
   {
-    $sync = new Synchronization();
+    $sync = new Synchronization($this->correctDbConfig);
     ReflectionHelper::invokePrivateMethod($sync, 'setupConnections', [[
       'local_server' => [
         'adapter' => 'mysql',
