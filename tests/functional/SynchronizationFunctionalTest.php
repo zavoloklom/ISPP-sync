@@ -1,5 +1,6 @@
 <?php
 
+use Codeception\Util\Fixtures;
 use zavoloklom\ispp\sync\src\Synchronization;
 
 /**
@@ -12,6 +13,16 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
 
   protected function _before()
   {
+    // Очистить таблицы
+    $connection = new \Pixie\Connection('mysql', [
+      'driver'    => 'mysql',
+      'host'      => '127.0.0.1',
+      'username'  => 'root',
+      'password'  => '',
+      'database'  => 'ispp-iseduc-test'
+    ]);
+    $qb = new \Pixie\QueryBuilder\QueryBuilderHandler($connection);
+    $qb->query("TRUNCATE ispp_group");
   }
 
   protected function _after()
@@ -30,60 +41,89 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
    */
   public function testGroupsActionInsertDataToWebServer()
   {
-    $sync = new Synchronization();
-    $sync->events();
-    $this->tester->haveInDatabase('ispp-ecafe-test.clients_groups', [
-      'IdOfClientsGroup' => 1001001
-    ]);
+    $sync = new Synchronization(Fixtures::get('config'));
+    $sync->groups();
+
+    $this->tester->seeNumRecords(10, 'ispp-iseduc-test.ispp_group');
+    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'6-Г']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'СДС Мордашова']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-О']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'Администрация']);
   }
 
-  // tests
-  public function testMe()
+  /**
+   * Есть записи в ИС ПП
+   * Есть корректные и некорректные записи в веб версии (неправильные ИД) записи в веб версии
+   * Вызывается метод groups
+   * Должно быть нужное количество в веб
+   * Должна присутствовать определенная запись (с нужным типом)
+   * Должна отсутствовать определенная запись (с типом не равным нужному)
+   * Должна появится запись в таблице синхронизаций (?)
+   * Должно быть выведено определенное сообщение (данные не нуждаются в синхронизации)
+   */
+  public function testGroupsActionUpdateDataToWebServer()
   {
+    // Начальный набор
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-З', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '6-Г', 'system_id'=>1000000002]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '5-Л', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '8-М', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '5-Г', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '5-Н', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '7-З', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '4-Е', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '3-В', 'system_id'=>9]);
 
+    $sync = new Synchronization(Fixtures::get('config'));
+    $sync->groups();
 
-    /**
-     * Есть записи в ИС ПП
-     * Есть корректные записи в веб версии
-     * Вызывается метод groups
-     * Должно быть нужное количество в веб
-     * Должна присутствовать определенная запись (с нужным типом)
-     * Должна отсутствовать определенная запись (с типом не равным нужному)
-     * Должна появится запись в таблице синхронизаций (?)
-     * Должно быть выведено определенное сообщение (данные не нуждаются в синхронизации)
-     */
+    $this->tester->seeNumRecords(10, 'ispp-iseduc-test.ispp_group');
+    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'6-Г', 'system_id'=>1000000002]);
+    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-Л', 'system_id'=>1000000005]);
 
-    /**
-     * Есть записи в ИС ПП
-     * Есть некорректные записи в веб версии (неправильные ИД)
-     * Вызывается метод groups
-     * Должно быть нужное количество в веб
-     * Должна присутствовать определенная запись (с нужным типом)
-     * Должна отсутствовать определенная запись (с типом не равным нужному)
-     * Должна появится запись в таблице синхронизаций (?)
-     * Должно быть выведено определенное сообщение
-     */
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'СДС Мордашова']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-О']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'Администрация']);
+  }
 
-    /**
-     * Есть записи в ИС ПП
-     * Есть некорректные записи в веб версии (не хватает нескольких групп)
-     * Вызывается метод groups
-     * Должно быть нужное количество в веб
-     * Должна присутствовать определенная запись (с нужным типом)
-     * Должна отсутствовать определенная запись (с типом не равным нужному)
-     * Должна появится запись в таблице синхронизаций (?)
-     * Должно быть выведено определенное сообщение
-     */
+  /**
+   * Есть записи в ИС ПП
+   * Есть некорректные записи в веб версии (не хватает нескольких групп)
+   * Вызывается метод groups
+   * Должно быть нужное количество в веб
+   * Должна присутствовать определенная запись (с нужным типом)
+   * Должна отсутствовать определенная запись (с типом не равным нужному)
+   * Должна появится запись в таблице синхронизаций (?)
+   * Должно быть выведено определенное сообщение
+   */
+  public function testGroupsActionUpdateAndInsertNewGroupsToWebServer()
+  {
+    $sync = new Synchronization(Fixtures::get('config'));
+    $sync->groups();
 
-    /**
-     * Есть записи в ИС ПП
-     * Есть некорректные записи в веб версии (лишние группы)
-     * Вызывается метод groups
-     * Должно быть нужное количество в веб
-     * Должна присутствовать определенная запись (с нужным типом)
-     * Должна отсутствовать определенная запись (с типом не равным нужному)
-     * Должна появится запись в таблице синхронизаций (?)
-     * Должно быть выведено определенное сообщение
-     */
+    $this->tester->seeNumRecords(10, 'ispp-iseduc-test.ispp_group');
+    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'6-Г']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'СДС Мордашова']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-О']);
+    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'Администрация']);
+  }
+
+  /**
+   * Есть записи в ИС ПП
+   * Есть некорректные записи в веб версии (лишние группы)
+   * Вызывается метод groups
+   * Должно быть нужное количество в веб
+   * Должна присутствовать определенная запись (с нужным типом)
+   * Должна отсутствовать определенная запись (с типом не равным нужному)
+   * Должна появится запись в таблице синхронизаций (?)
+   * Должно быть выведено определенное сообщение
+   */
+  public function testGroupsActionHideUnnecessaryGroupOnWebServer()
+  {
+    return false;
   }
 }
