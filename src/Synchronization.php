@@ -7,8 +7,10 @@
 
 namespace zavoloklom\ispp\sync\src;
 
+use Codeception\Util\Debug;
 use Pixie\Connection;
 use Pixie\QueryBuilder\QueryBuilderHandler;
+use zavoloklom\ispp\sync\src\models\Client;
 use zavoloklom\ispp\sync\src\models\ClientsGroup;
 use zavoloklom\ispp\sync\src\models\IsppGroup;
 
@@ -30,6 +32,9 @@ class Synchronization
 
   /** @var SlackNotification */
   public $notification;
+
+  /** @var integer The Id of department for synchronization log table */
+  public $department_id = 0;
 
   /**
    * Тестирование установки соединения
@@ -158,14 +163,15 @@ class Synchronization
     echo 'Количество созданных групп ', $createdGroupsCount, PHP_EOL;
     echo 'Количество обновленных групп ', $updatedGroupsCount, PHP_EOL;
     echo 'Количество скрытых групп ', $hiddenGroupsCount, PHP_EOL;
+    echo 'Ошибок при соединении с БД ', $errors, PHP_EOL;
 
     // Отправка уведомления
     if ($this->notificationEnabled) {
-      $this->notification->sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount);
+      $this->notification->sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount, $errors);
     }
 
     // Запись в таблицу синхронизаций
-    //$this->logSynchronizationInfo('update-groups', $department_id, $errors);
+    $this->logSynchronizationInfo('update-groups', $this->department_id, $errors);
   }
 
 
@@ -174,7 +180,97 @@ class Synchronization
    */
   public function students()
   {
-    return 'Students Action';
+    echo 'Синхронизация идентификаторов учеников', PHP_EOL, PHP_EOL;
+
+    // Нужно продумать как без особых усилий можно было бы обновлять статус ученика
+    // $lastUpdate = $this->serverDb->createCommand("SELECT MAX(datetime) FROM ispp_sync WHERE action='update-students'")->queryScalar();
+    // $lastUpdate = $lastUpdate ? $lastUpdate : date("Y-m-d H:i:s");
+
+    $localClientModel = new Client();
+    $local = $localClientModel::qb()
+      ->select([
+        Client::tableName().'.IdOfClient',
+        Client::tableName().'.ClientsGroupId',
+        Client::tableName().'.Name',
+        Client::tableName().'.SecondName',
+        Client::tableName().'.Surname'
+      ])
+      ->innerJoin(ClientsGroup::tableName(), 'ClientsGroupId', '=', 'IdOfClientsGroup');
+
+    Debug::debug('Количество записей '.$local->count());
+
+    // Скрипт по полю LastUpdate обновляет данные
+    $query = "SELECT
+    `clients`.`IdOfClient`,
+    `clients`.`ClientsGroupId`,
+    `clients`.`Name`,
+    `clients`.`SecondName`,
+    `clients`.`Surname`,
+    (IF(CHAR_LENGTH(`clients`.`Image`)>0, 0, 1)) AS Photo,
+	(IF(CHAR_LENGTH(`clients`.`email`)>0, true, false) || IF(CHAR_LENGTH(`clients`.`mobile`)>0, true, false) || IF((SELECT COUNT(`guardians`.`ChildClientId`) FROM `guardians` WHERE `guardians`.`ChildClientId` = `clients`.`IdOfClient`)>0, true, false)) AS Notify
+    FROM `clients`
+      INNER JOIN `clients_groups`
+        ON `clients`.`ClientsGroupId` = `clients_groups`.`IdOfClientsGroup`
+    WHERE (`clients_groups`.`GroupType` = 1 OR `clients`.`ClientsGroupId` = 1100000060)";
+    //AND `clients`.`LastUpdate` >= '".$lastUpdate."'";
+
+    $students = $this->localDb->createCommand($query)->queryAll();
+
+    $errors = 0;
+    foreach ($students as $student) {
+      try {
+        // Если ученик перенесен в группу выбывшие - поставить статус 0
+        if ($student['ClientsGroupId'] == '1100000060') {
+          $this->serverDb->createCommand()->update('{{%ispp_student}}',
+            [
+              "state" => 0,
+              "name" => $student['Name'],
+              "middlename" => $student['SecondName'],
+              "lastname" => $student['Surname'],
+              "photo" => $student['Photo'],
+              "notify" => $student['Notify']
+            ],
+            'system_id = '.$student['IdOfClient']
+          )->execute();
+          echo ".";
+        }
+        // Если ученик новый, то нужно записать его в серверную БД
+        elseif ($this->serverDb->createCommand("SELECT * FROM ispp_student WHERE system_id=".$student['IdOfClient'])->queryOne()  === false) {
+          $this->serverDb->createCommand()->insert('{{%ispp_student}}',
+            [
+              'system_id = '.$student['IdOfClient'],
+              "system_group_id" => $student['ClientsGroupId'],
+              "name" => $student['Name'],
+              "middlename" => $student['SecondName'],
+              "lastname" => $student['Surname'],
+              "photo" => $student['Photo'],
+              "notify" => $student['Notify']
+            ]
+          )->execute();
+          echo ".";
+        }
+        // Если ученик не выбыл и не новый
+        else {
+          $this->serverDb->createCommand()->update('{{%ispp_student}}',
+            [
+              "system_group_id" => $student['ClientsGroupId'],
+              "name" => $student['Name'],
+              "middlename" => $student['SecondName'],
+              "lastname" => $student['Surname'],
+              "photo" => $student['Photo'],
+              "notify" => $student['Notify']
+            ],
+            'system_id = '.$student['IdOfClient']
+          )->execute();
+          echo ".";
+        }
+      } catch (Exception $e) {
+        echo "X";
+        $errors++;
+      }
+    }
+
+    // Запись в таблицу синхронизаций
   }
 
   /**
