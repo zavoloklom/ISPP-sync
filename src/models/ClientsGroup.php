@@ -38,6 +38,7 @@ class ClientsGroup extends ActiveRecord
 
   /**
    * @inheritdoc
+   * @return ClientsGroupQuery
    */
   public static function qb()
   {

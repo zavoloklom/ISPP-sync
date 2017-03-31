@@ -7,7 +7,6 @@
 
 namespace zavoloklom\ispp\sync\src\models;
 
-use Pixie\Connection;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 
 /**
@@ -16,8 +15,14 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  */
 class ClientsGroupQuery extends QueryBuilderHandler
 {
-  public function active()
+  public function schoolClasses()
   {
-    return $this->where('state', '=', 1);
+    return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
   }
+
+  public function kindergartens()
+  {
+    return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_KINDERGARTEN);
+  }
+
 }
