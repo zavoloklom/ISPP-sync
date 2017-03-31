@@ -9,7 +9,8 @@ namespace zavoloklom\ispp\sync\src;
 
 use Pixie\Connection;
 use Pixie\QueryBuilder\QueryBuilderHandler;
-use zavoloklom\ispp\sync\src\models\ISPPQuery;
+use zavoloklom\ispp\sync\src\models\ClientsGroup;
+use zavoloklom\ispp\sync\src\models\IsppGroup;
 
 /**
  * Class Synchronization
@@ -89,62 +90,55 @@ class Synchronization
   {
     echo 'Синхронизация идентификаторов групп', PHP_EOL, PHP_EOL;
 
-    /**
-     * Выборка нужных групп из таблицы ИС ПП
-     *
-     * GroupType - 0 (Пустые группы, администрация и т.п.)
-     * GroupType - 1 (Учебные классы)
-     * GroupType - 2 (Группы дет. сада)
-     */
-    $localGroups = $this->local_connection
-      ->table('clients_groups')
+    // Выборка нужных групп из таблицы ИС ПП
+    $localGroupsModel = new ClientsGroup();
+    $localGroups = $localGroupsModel::qb()
       ->select([
-        'clients_groups.IdOfClientsGroup',
-        'clients_groups.Name'
+        'IdOfClientsGroup',
+        'Name'
       ])
-      ->where('clients_groups.GroupType', '=', 1)
+      ->schoolClasses()
       ->get();
-    // $localGroups = ClientGroup::qb()->select([)->class()->get();
+    $localGroupsCount = $localGroupsModel::qb()->schoolClasses()->count();
 
     // Количество групп в веб версии
-    $webGroupsCount = $this->web_connection->table('ispp_group')->count();
-    // $webGroupsCount = IsppGroup::qb()->count();
+    $webGroupsModel = new IsppGroup();
+    $webGroupsCount = $webGroupsModel::qb()->count();
 
     // Посчитать количество скрытых групп на текущий момент
+    $inactiveWebGroupsStartCount = $webGroupsModel::qb()->inactive()->count();
+
     // Установить видимость 0 перед синхронизацией
-    $hiddenWebGroupsCount = $this->web_connection->table('ispp_group')->where('state', '=', 0)->count();
-    // $webGroupsCount = IsppGroup::qb()->hiddenScope()->count();
-
-
-    $this->web_connection->table('ispp_group')->update(['state'=>0]);
-    // $webGroupsCount = IsppGroup::qb()->update(['state'=>0]);
+    $webGroupsModel::qb()->update(['state' => IsppGroup::STATE_INACTIVE]);
 
     $errors = 0;
+    $createdGroupsCount = 0;
+    $updatedGroupsCount = 0;
     foreach ($localGroups as $localGroup) {
       try {
-        $webGroup = $this->web_connection
-          ->table('ispp_group')
+        $webGroup = $webGroupsModel::qb()
           ->select('*')
           ->where('name', '=', $localGroup->Name)
           ->get();
 
         if ($webGroupsCount && $webGroup) {
-          $this->web_connection
-            ->table('ispp_group')
+          $webGroupsModel::qb()
             ->where('ispp_group.name', '=', $localGroup->Name)
             ->update([
               'system_id' => $localGroup->IdOfClientsGroup,
               'modified'  => date("Y-m-d H:i:s"),
-              'state'     => 1
+              'state'     => IsppGroup::STATE_ACTIVE
             ]);
+          $updatedGroupsCount++;
         } else {
-          $this->web_connection
-            ->table('ispp_group')
+          $webGroupsModel::qb()
             ->insert([
               'system_id' => $localGroup->IdOfClientsGroup,
               'name'      => $localGroup->Name,
-              'created'   => date("Y-m-d H:i:s")
+              'created'   => date("Y-m-d H:i:s"),
+              'state'     => IsppGroup::STATE_ACTIVE
             ]);
+          $createdGroupsCount++;
         }
         echo '.';
       } catch (\Exception $e) {
@@ -154,25 +148,26 @@ class Synchronization
     }
     echo PHP_EOL;
 
-    // Количество созданных групп
-    // Количество обновленных групп
-    // Количество скрытых групп в процессе синхронизации $hiddenWebGroupsCount
-    //echo 'Количество групп ', $query->count(), PHP_EOL;
+    // Посчитать количество скрытых групп на момент окончания
+    $inactiveWebGroupsFinishCount = $webGroupsModel::qb()->inactive()->count();
+    $hiddenGroupsCount = ($inactiveWebGroupsFinishCount-$inactiveWebGroupsStartCount);
 
-    echo 'Синхронизация идентификаторов групп выполнена', PHP_EOL;
-  }
+    // Отчет о синхронизации
+    echo 'Синхронизация идентификаторов групп выполнена.', PHP_EOL;
+    echo 'Общее количество групп ', $localGroupsCount, PHP_EOL;
+    echo 'Количество созданных групп ', $createdGroupsCount, PHP_EOL;
+    echo 'Количество обновленных групп ', $updatedGroupsCount, PHP_EOL;
+    echo 'Количество скрытых групп ', $hiddenGroupsCount, PHP_EOL;
 
-
-  private function updateSyncInfo($table, $name)
-  {
-    // Запись в таблицу синхронизаций
-    try {
-      //$this->serverDb->createCommand()->insert('{{%ispp_sync}}', ['action'=>'update-groups', 'errors'=> $errors, 'datetime'=>date('Y-m-d H:i:s')])->execute();
-      echo 'Запись в таблицу синхронизаций прошла успешно', PHP_EOL;
-    } catch (\Exception $e) {
-      echo 'Запись в таблицу синхронизаций не удалась', PHP_EOL;
+    // Отправка уведомления
+    if ($this->notificationEnabled) {
+      $this->notification->sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount);
     }
+
+    // Запись в таблицу синхронизаций
+    //$this->logSynchronizationInfo('update-groups', $department_id, $errors);
   }
+
 
   /**
    * Students synchronization
@@ -198,6 +193,23 @@ class Synchronization
     $this->groups();
     $this->students();
     $this->events();
+  }
+
+
+  /**
+   * @param string  $action
+   * @param integer $department_id
+   * @param integer $errors
+   */
+  private function logSynchronizationInfo($action, $department_id, $errors = 0)
+  {
+    // Запись в таблицу синхронизаций
+    try {
+      //$this->serverDb->createCommand()->insert('{{%ispp_sync}}', ['action'=>'update-groups', 'errors'=> $errors, 'datetime'=>date('Y-m-d H:i:s')])->execute();
+      echo 'Запись в таблицу синхронизаций прошла успешно', PHP_EOL;
+    } catch (\Exception $e) {
+      echo 'Запись в таблицу синхронизаций не удалась', PHP_EOL;
+    }
   }
 
   /**
