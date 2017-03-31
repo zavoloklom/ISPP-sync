@@ -1,8 +1,12 @@
 <?php
 
 return (array) array(
-  'organization' => '',
+  'organization' => [
+    'name'    => '',
+    'website' => ''
+  ],
   'department' => [
+    'id'      => '',
     'name'    => '',
     'address' => ''
   ],

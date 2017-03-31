@@ -1,8 +1,12 @@
 <?php
 
 return (array) array(
-  'organization' => 'Test Organization',
+  'organization' => [
+    'name'    => 'Test Organization',
+    'website' => '127.0.0.1'
+  ],
   'department' => [
+    'id'      => 0,
     'name'    => 'Department Name',
     'address' => 'Department Address'
   ],
