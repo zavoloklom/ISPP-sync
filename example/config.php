@@ -3,7 +3,11 @@
 return (array) array(
   'organization' => [
     'name'    => '',
-    'website' => ''
+    'website' => [
+      'name'  => '',
+      'url'   => '',
+      'ip'    => ''
+    ]
   ],
   'department' => [
     'id'      => '',

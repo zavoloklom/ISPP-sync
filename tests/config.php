@@ -3,7 +3,11 @@
 return (array) array(
   'organization' => [
     'name'    => 'Test Organization',
-    'website' => '127.0.0.1'
+    'website' => [
+      'name'  => 'Site Name',
+      'url'   => 'http://127.0.0.1/',
+      'ip'    => '127.0.0.1'
+    ]
   ],
   'department' => [
     'id'      => 0,
