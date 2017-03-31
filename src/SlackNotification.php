@@ -107,8 +107,9 @@ class SlackNotification
    * @param integer $createdGroupsCount Количество созданных групп в процессе синхронизации
    * @param integer $updatedGroupsCount Количество обновленных групп в процессе синхронизации
    * @param integer $hiddenGroupsCount  Количество скрытых групп в процессе синхронизации
+   * @param integer $errors             Количество ошибок при записи/обновлении данных в БД
    */
-  public function sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount)
+  public function sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount, $errors)
   {
     $message = $this->slack->createMessage();
     $message
@@ -132,6 +133,11 @@ class SlackNotification
           [
             'title' => 'Скрыто групп',
             'value' => $hiddenGroupsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Ошибок',
+            'value' => $errors,
             'short' => true
           ]
         ],
