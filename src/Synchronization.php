@@ -19,122 +19,66 @@ use zavoloklom\ispp\sync\src\models\ISPPQuery;
 class Synchronization
 {
 
-  const ACTION_GROUPS = 'groups';
+  const ACTION_GROUPS   = 'groups';
   const ACTION_STUDENTS = 'students';
-  const ACTION_EVENTS = 'events';
-  const ACTION_ALL = 'all';
+  const ACTION_EVENTS   = 'events';
+  const ACTION_ALL      = 'all';
 
   /** @var boolean */
   public $notificationEnabled = false;
 
-  /** @var array */
-  public $config;
-
-  /** @var ISPPQuery */
-  private $local_connection;
-
-  /** @var QueryBuilderHandler */
-  private $web_connection;
-
   /** @var SlackNotification */
-  private $notify;
+  public $notification;
 
   /**
-   * Synchronization constructor.
-   * @param array $config
-   */
-  public function __construct(array $config = [])
-  {
-    // Инициализация уведомлений
-    $this->setupNotifications($config);
-
-    // Инициализация соединений
-    $this->setupConnections($config);
-
-    // Запись конфигурации
-    //if (!$this->config) {$this->config = $config;}
-  }
-
-  /**
-   * @return ISPPQuery
-   */
-  public function getLocalConnection()
-  {
-    return $this->local_connection;
-  }
-
-  /**
-   * @return QueryBuilderHandler
-   */
-  public function getWebConnection()
-  {
-    return $this->web_connection;
-  }
-
-
-  private function setupNotifications(array $config = [])
-  {
-    if (array_key_exists('slack', $config) && is_array($config['slack']) && $this->notify = new SlackNotification($config['slack'])) {
-      $this->notificationEnabled = true;
-    }
-  }
-
-  /**
-   * Установка соединения с локальным сервером ИС ПП
+   * Тестирование установки соединения
    *
    * @param array $config
-   * @param string $alias
    * @return bool
    */
-  private function setupLocalConnection(array $config, string $alias = NULL)
+  private function testConnection(array $config = [])
   {
-    try {
-      $connection = new Connection($config['adapter'], $config['options'], $alias);
-      $this->local_connection = new ISPPQuery($connection);
-      echo 'Соединение с сервером ИС ПП успешно установлено', PHP_EOL;
-      return true;
-    } catch (\Exception $e) {
-      echo 'Не удалось установить соединение с сервером ИС ПП: ',  $e->getMessage(), PHP_EOL;
-      return false;
+    if (array_key_exists('adapter', $config) && array_key_exists('options', $config)) {
+      try {
+        $connection = new Connection($config['adapter'], $config['options']);
+        $qb = new QueryBuilderHandler($connection);
+        return true;
+      } catch (\Exception $e) {
+        return false;
+      }
     }
+    return false;
   }
 
   /**
-   * Установка соединения с веб сервером
+   * Тестирование соединения с веб сервером и сервером ИС ПП
+   * Может проводится отдельно или перед выполнением других команд.
    *
-   * @param array $config
-   * @param string $alias
+   * @param array $localConfig
+   * @param array $webConfig
    * @return bool
-   */
-  private function setupWebConnection(array $config, string $alias = NULL)
-  {
-    try {
-      $connection = new Connection($config['adapter'], $config['options'], $alias);
-      $this->web_connection = new QueryBuilderHandler($connection);
-      echo 'Соединение с веб сервером успешно установлено', PHP_EOL;
-      return true;
-    } catch (\Exception $e) {
-      echo 'Не удалось установить соединение с веб сервером: ',  $e->getMessage(), PHP_EOL;
-      return false;
-    }
-  }
-
-  /**
-   * Установка соединения с веб сервером и сервером ИС ПП
-   *
-   * @param array $config
    * @throws \Exception
    */
-  private function setupConnections(array $config = [])
+  public function testConnections(array $localConfig = [], array $webConfig = [])
   {
-    $localConnect  = array_key_exists('local_server', $config) ? $this->setupLocalConnection($config['local_server']) : false;
-    $serverConnect = array_key_exists('web_server', $config)   ? $this->setupWebConnection($config['web_server']) : false;
+    // Установка соединения с веб сервером
+    $serverConnect = $this->testConnection($localConfig);
+    echo $serverConnect ? 'Соединение с веб сервером успешно установлено' : 'Не удалось установить соединение с веб сервером';
+    echo PHP_EOL;
+
+    // Установка соединения с локальным сервером ИС ПП
+    $localConnect = $this->testConnection($webConfig);
+    echo $localConnect ? 'Соединение с сервером ИС ПП успешно установлено' : 'Не удалось установить соединение с сервером ИС ПП';
+    echo PHP_EOL;
+
+    // Проверка возможности синхронизации
     if (($localConnect && $serverConnect) === false) {
       if ($this->notificationEnabled) {
-        $this->notify->connectionError($localConnect, $serverConnect);
+        $this->notification->sendConnectionError($localConnect, $serverConnect);
       }
       throw new \Exception('Синхронизация невозможна.');
     }
+    return true;
   }
 
 

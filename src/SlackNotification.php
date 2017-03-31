@@ -24,6 +24,8 @@ class SlackNotification
   /** @var array */
   private $config;
 
+  public $department_name = 'Department Name';
+
 
   public function __construct(array $config)
   {
@@ -53,14 +55,14 @@ class SlackNotification
    * @param boolean $localConnect
    * @param boolean $serverConnect
    */
-  public function connectionError($localConnect, $serverConnect)
+  public function sendConnectionError($localConnect, $serverConnect)
   {
     $message = $this->slack->createMessage();
     $message
       ->setText('Не удалось синхронизировать данные')
       ->setAttachments([[
-        'fallback' => 'Проблема с синхронизацией данных в '.$this->config['department']['name'],
-        'title'  => $this->config['department']['name'],
+        'fallback' => 'Проблема с синхронизацией данных в '.$this->department_name,
+        'title'  => $this->department_name,
         'text' => 'Проблема с синхронизацией данных',
         'color' => 'danger',
         'fields' => [

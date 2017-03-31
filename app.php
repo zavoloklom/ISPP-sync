@@ -17,18 +17,29 @@ defined('STDOUT') or define('STDOUT', fopen('php://stdout', 'w'));
 require_once(__DIR__ . '/vendor/autoload.php');
 
 // Load configuration
-$config = include_once('config.php');
+define('CONFIG', include_once('config.php'));
 
 // ASCII Logotype
 Helper::printLogo();
 
+// Setup application
+$sync = new Synchronization();
+
+// Setup notification system
+if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new \zavoloklom\ispp\sync\src\SlackNotification(CONFIG['slack'])) {
+  // При создании экземпляра класса можно будет дополнительными параметрами (массив) передавать значения названия организации и отделения.
+  $notification->department_name = CONFIG['department']['name'];
+  $sync->notification = $notification;
+  $sync->notificationEnabled = true;
+}
+
 // Проверка корректности действий и установка действия по умолчанию
 if ($argc >= 2 && in_array($argv[1], Synchronization::actionsArray())) {
   $action = $argv[1];
-  $app = new Synchronization($config);
-  //$app->setupConnection();
-  //$app->execute($action, $params)
-  $app->$action();
+
+  // execute action
+  $sync->testConnections(CONFIG['local_server'], CONFIG['web_server']);
+  $sync->$action();
 } else {
   Helper::printHelp();
 }
