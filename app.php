@@ -24,6 +24,7 @@ Helper::printLogo();
 
 // Setup application
 $sync = new Synchronization();
+$sync->department_id = array_key_exists('department', CONFIG) ? CONFIG['department']['id'] : 0;
 
 // Setup notification system
 if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new \zavoloklom\ispp\sync\src\SlackNotification(CONFIG['slack'], CONFIG)) {
