@@ -53,19 +53,19 @@ class ActiveRecord
    */
   public static function tableName()
   {
-    return '{{%' . self::camel2id(self::basename(get_called_class()), '_') . '}}';
+    return self::camel2id(self::basename(get_called_class()));
   }
 
   /**
    * Converts a CamelCase name into an ID in lowercase.
-   * Words in the ID may be concatenated using the specified character (defaults to '-').
-   * For example, 'PostTag' will be converted to 'post-tag'.
+   * Words in the ID may be concatenated using the specified character (defaults to '_').
+   * For example, 'PostTag' will be converted to 'post_tag'.
    * @param string $name the string to be converted
    * @param string $separator the character used to concatenate the words in the ID
    * @param boolean|string $strict whether to insert a separator between two consecutive uppercase chars, defaults to false
    * @return string the resulting ID
    */
-  public static function camel2id($name, $separator = '-', $strict = false)
+  public static function camel2id($name, $separator = '_', $strict = false)
   {
     $regex = $strict ? '/[A-Z]/' : '/(?<![A-Z])[A-Z]/';
     if ($separator === '_') {
