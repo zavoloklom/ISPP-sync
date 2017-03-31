@@ -14,13 +14,7 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
   protected function _before()
   {
     // Очистить таблицы
-    $connection = new \Pixie\Connection('mysql', [
-      'driver'    => 'mysql',
-      'host'      => '127.0.0.1',
-      'username'  => 'root',
-      'password'  => '',
-      'database'  => 'ispp-iseduc-test'
-    ]);
+    $connection = new \Pixie\Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
     $qb = new \Pixie\QueryBuilder\QueryBuilderHandler($connection);
     $qb->query("TRUNCATE ispp_group");
   }
@@ -42,7 +36,7 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
   public function testGroupsActionInsertDataToWebServer()
   {
     // Выполнение команды
-    $sync = new Synchronization(Fixtures::get('config'));
+    $sync = new Synchronization();
     $sync->groups();
 
     // Проверки
@@ -79,7 +73,7 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '3-В', 'system_id'=>9]);
 
     // Выполнение команды
-    $sync = new Synchronization(Fixtures::get('config'));
+    $sync = new Synchronization();
     $sync->groups();
 
     // Проверки
@@ -110,7 +104,7 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
 
     // Выполнение команды
-    $sync = new Synchronization(Fixtures::get('config'));
+    $sync = new Synchronization();
     $sync->groups();
 
     // Проверки
@@ -139,7 +133,7 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '12-Я', 'system_id'=>1000000001]);
 
     // Выполнение команды
-    $sync = new Synchronization(Fixtures::get('config'));
+    $sync = new Synchronization();
     $sync->groups();
 
     // Проверки
