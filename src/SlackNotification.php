@@ -24,9 +24,16 @@ class SlackNotification
   /** @var array */
   private $config;
 
+  public $organization    = 'Organization';
   public $department_name = 'Department Name';
 
 
+  /**
+   * SlackNotification constructor.
+   *
+   * @param array $config
+   * @throws \Exception
+   */
   public function __construct(array $config)
   {
     // Инициализация Slack клиента
@@ -62,7 +69,7 @@ class SlackNotification
       ->setText('Не удалось синхронизировать данные')
       ->setAttachments([[
         'fallback' => 'Проблема с синхронизацией данных в '.$this->department_name,
-        'title'  => $this->department_name,
+        'title'  => $this->organization.' - '.$this->department_name,
         'text' => 'Проблема с синхронизацией данных',
         'color' => 'danger',
         'fields' => [
@@ -78,8 +85,45 @@ class SlackNotification
           ]
         ],
         'footer' => 'ISEduC API',
-        'footer_icon' => 'http://1534.org/icons/favicon-32x32.png',
-        'ts' => time()
+        'footer_icon' => 'http://1534.org/icons/favicon-32x32.png'
+      ]])
+      ->send();
+  }
+
+  /**
+   * @param integer $createdGroupsCount Количество созданных групп в процессе синхронизации
+   * @param integer $updatedGroupsCount Количество обновленных групп в процессе синхронизации
+   * @param integer $hiddenGroupsCount  Количество скрытых групп в процессе синхронизации
+   */
+  public function sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount)
+  {
+    $message = $this->slack->createMessage();
+    $message
+      ->setText('Синхронизация групп завершена')
+      ->setAttachments([[
+        'fallback' => 'Синхронизация групп в '.$this->department_name.' завершена',
+        'title'  => $this->organization.' - '.$this->department_name,
+        'text' => 'Синхронизация групп завершена:',
+        'color' => 'good',
+        'fields' => [
+          [
+            'title' => 'Создано групп',
+            'value' => $createdGroupsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Обновлено групп',
+            'value' => $updatedGroupsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Скрыто групп',
+            'value' => $hiddenGroupsCount,
+            'short' => true
+          ]
+        ],
+        'footer' => 'ISEduC API',
+        'footer_icon' => 'http://1534.org/icons/favicon-32x32.png'
       ]])
       ->send();
   }
