@@ -21,20 +21,24 @@ class SlackNotification
   /** @var Client */
   private $slack;
 
-  /** @var array */
-  private $config;
+  /** @var array Organization data */
+  private $organization;
 
-  public $organization    = 'Organization';
-  public $department_name = 'Department Name';
+  /** @var array Department data */
+  private $department;
+
+  protected $message_text_prefix;
+  protected $message_title;
 
 
   /**
    * SlackNotification constructor.
    *
    * @param array $config
+   * @param array $options Options to setup $organization and $department variables
    * @throws \Exception
    */
-  public function __construct(array $config)
+  public function __construct(array $config, array $options = [])
   {
     // Инициализация Slack клиента
     if (array_key_exists('webhook', $config)) {
@@ -54,8 +58,17 @@ class SlackNotification
       throw new \Exception('Не установлено значение для webhook.');
     }
 
-    // Загрузка конфигурации
-    $this->config = $config;
+    // Initialize private variables
+    if (array_key_exists('organization', $options)) {
+      $this->organization = $options['organization'];
+    }
+    if (array_key_exists('department', $options)) {
+      $this->department = $options['department'];
+    }
+
+    $this->message_text_prefix = $this->organization ? '<'.$this->organization['website']['url'].'|'.$this->organization['website']['name'].' ['.$this->organization['website']['ip'].']>' : 'Your Organization';
+    $this->message_title = ($this->organization && $this->department) ? $this->organization['name'].' - '.$this->department['name'] : 'Your Department';
+
   }
 
   /**
@@ -66,10 +79,10 @@ class SlackNotification
   {
     $message = $this->slack->createMessage();
     $message
-      ->setText('Не удалось синхронизировать данные')
+      ->setText($this->message_text_prefix.' - Не удалось синхронизировать данные')
       ->setAttachments([[
-        'fallback' => 'Проблема с синхронизацией данных в '.$this->department_name,
-        'title'  => $this->organization.' - '.$this->department_name,
+        'fallback' => 'Проблема с синхронизацией данных',
+        'title'  => $this->message_title,
         'text' => 'Проблема с синхронизацией данных',
         'color' => 'danger',
         'fields' => [
@@ -99,10 +112,10 @@ class SlackNotification
   {
     $message = $this->slack->createMessage();
     $message
-      ->setText('Синхронизация групп завершена')
+      ->setText($this->message_text_prefix.' - Синхронизация групп завершена')
       ->setAttachments([[
-        'fallback' => 'Синхронизация групп в '.$this->department_name.' завершена',
-        'title'  => $this->organization.' - '.$this->department_name,
+        'fallback' => 'Синхронизация групп завершена',
+        'title'  => $this->message_title,
         'text' => 'Синхронизация групп завершена:',
         'color' => 'good',
         'fields' => [

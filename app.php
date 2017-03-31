@@ -26,9 +26,7 @@ Helper::printLogo();
 $sync = new Synchronization();
 
 // Setup notification system
-if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new \zavoloklom\ispp\sync\src\SlackNotification(CONFIG['slack'])) {
-  // При создании экземпляра класса можно будет дополнительными параметрами (массив) передавать значения названия организации и отделения.
-  $notification->department_name = CONFIG['department']['name'];
+if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new \zavoloklom\ispp\sync\src\SlackNotification(CONFIG['slack'], CONFIG)) {
   $sync->notification = $notification;
   $sync->notificationEnabled = true;
 }
