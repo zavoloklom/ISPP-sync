@@ -11,35 +11,11 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
   /** @var \UnitTester */
   protected $tester;
 
-  private $correctDbConfig;
-
   /**
    * @inheritdoc
    */
   protected function _before()
   {
-    $this->correctDbConfig = [
-      'local_server' => [
-        'adapter' => 'mysql',
-        'options' => [
-          'driver'    => 'mysql',
-          'host'      => '127.0.0.1',
-          'username'  => 'root',
-          'password'  => '',
-          'database'  => 'ispp-ecafe-test',
-        ],
-      ],
-      'web_server' => [
-        'adapter' => 'mysql',
-        'options' => [
-          'driver'    => 'mysql',
-          'host'      => '127.0.0.1',
-          'username'  => 'root',
-          'password'  => '',
-          'database'  => 'ispp-iseduc-test',
-        ],
-      ]
-    ];
   }
 
   /**
@@ -47,80 +23,27 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
    */
   protected function _after()
   {
-    $this->correctDbConfig = [];
-  }
-
-  /**
-   * Для конфига без указания 'slack'
-   * Уведомления должны быть выключены
-   */
-  public function testNotificationsIsDisabledWhenSlackConfigDoesNotExist()
-  {
-    $sync = new Synchronization(array_merge($this->correctDbConfig, []));
-    $this->tester->assertFalse($sync->notificationEnabled);
-  }
-
-  /**
-   * Для конфига где 'slack' принимает значение отличное от массива
-   * Уведомления должны быть выключены
-   */
-  public function testNotificationsIsDisabledWhenSlackConfigIsNotArray()
-  {
-    $sync = new Synchronization(array_merge($this->correctDbConfig, ['slack' => false]));
-    $this->tester->assertFalse($sync->notificationEnabled);
-  }
-
-  /**
-   * Для конфига где 'slack' принимает значение пустого массива
-   * Должно быть проброшено исключение
-   */
-  public function testNotificationsThrowExceptionWhenSlackConfigIsEmpty()
-  {
-    $this->tester->expectException(new \Exception('Не установлено значение для webhook.'), function() {
-      new Synchronization(array_merge($this->correctDbConfig, ['slack' => []]));
-    });
-  }
-
-  /**
-   * Для конфига где 'slack' принимает значение неправльного адреса в 'webhook'
-   * Должно быть проброшено исключение
-   */
-  public function testNotificationsThrowExceptionWhenSlackWebhookUriIsWrong()
-  {
-    $this->tester->expectException(\Exception::class, function() {
-      new Synchronization(array_merge($this->correctDbConfig, ['slack' => ['webhook' => 'test.test']]));
-    });
-  }
-
-  /**
-   * Для конфига где 'slack' принимает правильные значения
-   * Уведомления должны быть включены
-   */
-  public function testNotificationsIsEnabledWhenSlackWebhookUriIsRight()
-  {
-    $sync = new Synchronization(array_merge($this->correctDbConfig, ['slack' => ['webhook' => '127.0.0.1']]));
-    $this->tester->assertTrue($sync->notificationEnabled);
   }
 
   /**
    * Для пустой конфигурации
-   * Приватный метод setupLocalConnection должен возвращать false
+   * Приватный метод testConnection должен возвращать false
    */
-  public function testLocalConnectionIsFalseWhenConfigIsEmpty()
+  public function testConnectionIsFalseWhenConfigIsEmpty()
   {
-    $sync = new Synchronization($this->correctDbConfig);
-    $setupLocalConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupLocalConnection', [[]]);
-    $this->tester->assertFalse($setupLocalConnection);
+    $sync = new Synchronization();
+    $testConnection = ReflectionHelper::invokePrivateMethod($sync, 'testConnection', [[]]);
+    $this->tester->assertFalse($testConnection);
   }
 
   /**
    * Для неправильной конфигурации
-   * Приватный метод setupLocalConnection должен возвращать false
+   * Приватный метод testConnection должен возвращать false
    */
-  public function testLocalConnectionIsFalseWhenConfigIsIncorrect()
+  public function testConnectionIsFalseWhenConfigIsIncorrect()
   {
-    $sync = new Synchronization($this->correctDbConfig);
-    $setupLocalConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupLocalConnection', [[
+    $sync = new Synchronization();
+    $testConnection = ReflectionHelper::invokePrivateMethod($sync, 'testConnection', [[
       'adapter' => 'mysql',
       'options' => [
         'driver'    => 'mysql',
@@ -128,18 +51,17 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
         'password'  => '',
       ],
     ]]);
-    $this->tester->assertFalse($setupLocalConnection);
+    $this->tester->assertFalse($testConnection);
   }
 
   /**
    * Для правильной конфигурации
-   * Приватный метод setupLocalConnection должен возвращать true
-   * Приватная переменная $local_connection должна быть экземпляром класса 'Pixie\QueryBuilder\QueryBuilderHandler'
+   * Приватный метод testConnection должен возвращать true
    */
-  public function testLocalConnectionIsTrueWhenConfigIsCorrect()
+  public function testConnectionIsTrueWhenConfigIsCorrect()
   {
-    $sync = new Synchronization($this->correctDbConfig);
-    $setupLocalConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupLocalConnection', [[
+    $sync = new Synchronization();
+    $testConnection = ReflectionHelper::invokePrivateMethod($sync, 'testConnection', [[
       'adapter' => 'mysql',
       'options' => [
         'driver'    => 'mysql',
@@ -149,91 +71,66 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
         'database'  => 'ispp-ecafe-test',
       ],
     ]]);
-    $this->tester->assertTrue($setupLocalConnection);
-    $this->tester->assertInstanceOf('Pixie\QueryBuilder\QueryBuilderHandler', $sync->getLocalConnection());
+    $this->tester->assertTrue($testConnection);
   }
 
   /**
-   * Для пустой конфигурации
-   * Приватный метод setupWebConnection должен возвращать false
+   * Для неправильной конфигурации обоих подключений
+   * Должно быть выброшено исключение при проверки возможности проведения синхронизации
    */
-  public function testWebConnectionIsFalseWhenConfigIsEmpty()
-  {
-    $sync = new Synchronization($this->correctDbConfig);
-    $setupWebConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupWebConnection', [[]]);
-    $this->tester->assertFalse($setupWebConnection);
-  }
-
-  /**
-   * Для неправильной конфигурации
-   * Приватный метод setupWebConnection должен возвращать false
-   */
-  public function testWebConnectionIsFalseWhenConfigIsIncorrect()
-  {
-    $sync = new Synchronization($this->correctDbConfig);
-    $setupWebConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupWebConnection', [[
-      'adapter' => 'mysql',
-      'options' => [
-        'driver'    => 'mysql',
-        'username'  => 'root',
-        'password'  => '',
-      ],
-    ]]);
-    $this->tester->assertFalse($setupWebConnection);
-  }
-
-  /**
-   * Для правильной конфигурации
-   * Приватный метод setupWebConnection должен возвращать true
-   * Приватная переменная $web_connection должна быть экземпляром класса 'Pixie\QueryBuilder\QueryBuilderHandler'
-   */
-  public function testWebConnectionIsTrueWhenConfigIsCorrect()
-  {
-    $sync = new Synchronization($this->correctDbConfig);
-    $setupWebConnection = ReflectionHelper::invokePrivateMethod($sync, 'setupWebConnection', [[
-      'adapter' => 'mysql',
-      'options' => [
-        'driver'    => 'mysql',
-        'host'      => '127.0.0.1',
-        'username'  => 'root',
-        'password'  => '',
-        'database'  => 'ispp-iseduc-test',
-      ],
-    ]]);
-    $this->tester->assertTrue($setupWebConnection);
-    $this->tester->assertInstanceOf('Pixie\QueryBuilder\QueryBuilderHandler', $sync->getWebConnection());
-  }
-
-  /**
-   * Для неправильной конфигурации
-   * Должно быть выброшено исключение
-   */
-  public function testSetupConnectionsThrowExceptionWhenConfigIsWrong()
+  public function testConnectionsThrowExceptionWhenBothConfigsIsWrong()
   {
     $this->tester->expectException(\Exception::class, function() {
-      ReflectionHelper::invokePrivateMethod(new Synchronization($this->correctDbConfig), 'setupConnections', [[
-        'local_server' => [
+      $sync = new Synchronization();
+      $sync->testConnections(
+        [
           'adapter' => 'mysql',
           'options' => [],
         ],
-        'web_server' => [
+        [
           'adapter' => 'mysql',
           'options' => [],
         ]
-      ]]);
+      );
+    });
+  }
+
+  /**
+   * Для неправильной конфигурации одного из подключений
+   * Должно быть выброшено исключение при проверки возможности проведения синхронизации
+   */
+  public function testConnectionsThrowExceptionWhenOneOfConfigsIsWrong()
+  {
+    $this->tester->expectException(\Exception::class, function() {
+      $sync = new Synchronization();
+      $sync->testConnections(
+        [
+          'adapter' => 'mysql',
+          'options' => [
+            'driver'    => 'mysql',
+            'host'      => '127.0.0.1',
+            'username'  => 'root',
+            'password'  => '',
+            'database'  => 'ispp-ecafe-test',
+          ],
+        ],
+        [
+          'adapter' => 'mysql',
+          'options' => [],
+        ]
+      );
     });
   }
 
   /**
    * Для правильной конфигурации
-   * Приватная переменная $local_connection должна быть экземпляром класса 'Pixie\QueryBuilder\QueryBuilderHandler'
-   * Приватная переменная $web_connection должна быть экземпляром класса 'Pixie\QueryBuilder\QueryBuilderHandler'
+   * Метод testConnections должен вернуть true
    */
-  public function testSetupConnectionsIsOKWhenConfigIsRight()
+  public function testConnectionsIsTrueWhenBothConfigsIsRight()
   {
-    $sync = new Synchronization($this->correctDbConfig);
-    ReflectionHelper::invokePrivateMethod($sync, 'setupConnections', [[
-      'local_server' => [
+    $sync = new Synchronization();
+    $testConnections = $sync->testConnections(
+      [
         'adapter' => 'mysql',
         'options' => [
           'driver'    => 'mysql',
@@ -243,7 +140,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
           'database'  => 'ispp-ecafe-test',
         ],
       ],
-      'web_server' => [
+      [
         'adapter' => 'mysql',
         'options' => [
           'driver'    => 'mysql',
@@ -253,9 +150,20 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
           'database'  => 'ispp-iseduc-test',
         ],
       ]
-    ]]);
-    $this->tester->assertInstanceOf('Pixie\QueryBuilder\QueryBuilderHandler', $sync->getWebConnection());
-    $this->tester->assertInstanceOf('Pixie\QueryBuilder\QueryBuilderHandler', $sync->getLocalConnection());
+    );
+    $this->tester->assertTrue($testConnections);
   }
+
+  /**
+   * Для глобальной тестовой конфигурации
+   * Метод testConnections должен вернуть true
+   */
+  public function testConnectionsIsTrueForGlobalTestingConfig()
+  {
+    $sync = new Synchronization();
+    $testConnections = $sync->testConnections(CONFIG['local_server'], CONFIG['web_server']);
+    $this->tester->assertTrue($testConnections);
+  }
+
 
 }
