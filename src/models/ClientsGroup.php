@@ -21,29 +21,15 @@ class ClientsGroup extends ActiveRecord
   const TYPE_KINDERGARTEN = 2;
 
   /**
-   * Returns the database connection used by this AR class.
-   * By default, the "db" application component is used as the database connection.
-   * You may override this method if you want to use a different database connection.
-   * @return Connection the database connection used by this AR class.
+   * @inheritdoc
    */
   public static function getConnection()
   {
-    return new Connection('mysql', [
-      'driver'    => 'mysql',
-      'host'      => '127.0.0.1',
-      'username'  => 'root',
-      'password'  => '',
-      'database'  => 'ispp-ecafe-test'
-    ]);
-
-    // return new localConnection($GLOBALS['ISPP_SYNC_CONFIG'])
-    // return new Connection($GLOBALS['ISPP_SYNC_CONFIG']['local_server']['adapter'], $GLOBALS['ISPP_SYNC_CONFIG']['local_server']['options'])
+    return new Connection(CONFIG['local_server']['adapter'], CONFIG['local_server']['options']);
   }
 
   /**
-   * Return table name
-   *
-   * @return string
+   * @inheritdoc
    */
   public static function tableName()
   {
@@ -51,9 +37,7 @@ class ClientsGroup extends ActiveRecord
   }
 
   /**
-   * QueryBuilder
-   *
-   * @return ISPPQuery
+   * @inheritdoc
    */
   public static function qb()
   {
