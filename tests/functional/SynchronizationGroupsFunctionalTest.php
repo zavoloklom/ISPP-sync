@@ -1,12 +1,11 @@
 <?php
 
-use Codeception\Util\Fixtures;
 use zavoloklom\ispp\sync\src\Synchronization;
 
 /**
- * Class SynchronizationFunctionalTest
+ * Class SynchronizationGroupsFunctionalTest
  */
-class SynchronizationFunctionalTest extends \Codeception\Test\Unit
+class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
 {
   /** @var \FunctionalTester */
   protected $tester;
@@ -17,7 +16,6 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
     $connection = new \Pixie\Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
     $qb = new \Pixie\QueryBuilder\QueryBuilderHandler($connection);
     $qb->query("TRUNCATE ispp_group");
-    $qb->query("TRUNCATE ispp_student");
   }
 
   protected function _after()
@@ -145,28 +143,5 @@ class SynchronizationFunctionalTest extends \Codeception\Test\Unit
     $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'СДС Мордашова']);
     $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-О']);
     $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'Администрация']);
-  }
-
-  /**
-   * Есть записи в ИС ПП
-   * Нет записей в веб версии
-   * Вызывается метод groups
-   * Должно быть нужное количество в веб версии
-   * Должна присутствовать определенная запись (ученик)
-   * Должна отсутствовать определенная запись (учитель, родитель, администрация, детсадовец, выбывший ученик)
-   */
-  public function testStudentsActionInsertDataToWebServer()
-  {
-    // Выполнение команды
-    $sync = new Synchronization();
-    $sync->students();
-
-    // Проверки
-    $this->tester->seeNumRecords(10, 'ispp-iseduc-test.ispp_student');
-    //$this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['name'=>'6-Г']);
-    //$this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['name'=>'ДО2-Подготовительная №4']);
-    //$this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['name'=>'СДС Мордашова']);
-    //$this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['name'=>'5-О']);
-    //$this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['name'=>'Администрация']);
   }
 }
