@@ -273,7 +273,7 @@ class Synchronization
 
     // Отправка уведомления
     if ($this->notificationEnabled) {
-      //$this->notification->sendStudentsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
+      $this->notification->sendStudentsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
     }
 
     // Запись в таблицу синхронизаций

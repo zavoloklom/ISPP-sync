@@ -146,4 +146,48 @@ class SlackNotification
       ]])
       ->send();
   }
+
+  /**
+   * @param integer $createdStudentsCount Количество созданных учеников в процессе синхронизации
+   * @param integer $updatedStudentsCount Количество обновленных учеников в процессе синхронизации
+   * @param integer $hiddenStudentsCount  Количество скрытых учеников в процессе синхронизации
+   * @param integer $errors               Количество ошибок при записи/обновлении данных в БД
+   */
+  public function sendStudentsSynchronizationInfo($createdStudentsCount, $updatedStudentsCount, $hiddenStudentsCount, $errors)
+  {
+    $message = $this->slack->createMessage();
+    $message
+      ->setText($this->message_text_prefix.' - Синхронизация учеников завершена')
+      ->setAttachments([[
+        'fallback' => 'Синхронизация учеников завершена',
+        'title'  => $this->message_title,
+        'text' => 'Синхронизация учеников завершена:',
+        'color' => 'good',
+        'fields' => [
+          [
+            'title' => 'Создано учеников',
+            'value' => $createdStudentsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Обновлено учеников',
+            'value' => $updatedStudentsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Скрыто учеников',
+            'value' => $hiddenStudentsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Ошибок',
+            'value' => $errors,
+            'short' => true
+          ]
+        ],
+        'footer' => 'ISEduC API',
+        'footer_icon' => 'http://1534.org/icons/favicon-32x32.png'
+      ]])
+      ->send();
+  }
 }
