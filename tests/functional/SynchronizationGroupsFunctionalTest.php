@@ -129,7 +129,7 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
   public function testGroupsActionHideUnnecessaryGroupOnWebServer()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '12-Я', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '12-Я', 'system_id'=>1000000001, 'state'=>1]);
 
     // Выполнение команды
     $sync = new Synchronization();
