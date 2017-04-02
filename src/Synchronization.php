@@ -13,6 +13,7 @@ use zavoloklom\ispp\sync\src\models\Client;
 use zavoloklom\ispp\sync\src\models\ClientsGroup;
 use zavoloklom\ispp\sync\src\models\IsppGroup;
 use zavoloklom\ispp\sync\src\models\IsppStudent;
+use zavoloklom\ispp\sync\src\models\IsppSync;
 
 /**
  * Class Synchronization
@@ -377,19 +378,23 @@ class Synchronization
 
 
   /**
-   * @param string  $action
-   * @param integer $department_id
-   * @param integer $errors
+   * @param $action
+   * @param $department_id
+   * @param int $errors
+   * @param $datetime
    */
-  private function logSynchronizationInfo($action, $department_id, $errors = 0)
+  private function logSynchronizationInfo($action, $department_id, $errors = 0, $datetime = NULL)
   {
-    // Запись в таблицу синхронизаций
-    try {
-      //$this->serverDb->createCommand()->insert('{{%ispp_sync}}', ['action'=>'update-groups', 'errors'=> $errors, 'datetime'=>date('Y-m-d H:i:s')])->execute();
-      echo 'Запись в таблицу синхронизаций прошла успешно', PHP_EOL;
-    } catch (\Exception $e) {
-      echo 'Запись в таблицу синхронизаций не удалась', PHP_EOL;
+    if (!$datetime) {
+      $dt = new \DateTime("now", new \DateTimeZone('Europe/Moscow'));
+      $datetime = $dt->format('Y-m-d H:i:s');
     }
+
+    IsppSync::qb()->insert([
+      'action'    => $action.'_'.$department_id,
+      'errors'    => $errors,
+      'datetime'  => $datetime
+    ]);
   }
 
   /**
