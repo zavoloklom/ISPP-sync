@@ -7,12 +7,12 @@
 
 namespace zavoloklom\ispp\sync\src;
 
-use Codeception\Util\Debug;
 use Pixie\Connection;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 use zavoloklom\ispp\sync\src\models\Client;
 use zavoloklom\ispp\sync\src\models\ClientsGroup;
 use zavoloklom\ispp\sync\src\models\IsppGroup;
+use zavoloklom\ispp\sync\src\models\IsppStudent;
 
 /**
  * Class Synchronization
@@ -122,9 +122,7 @@ class Synchronization
     foreach ($localGroups as $localGroup) {
       try {
         $webGroup = $webGroupsModel::qb()
-          ->select('*')
-          ->where('name', '=', $localGroup->Name)
-          ->get();
+          ->find($localGroup->Name, 'name');
 
         if ($webGroupsCount && $webGroup) {
           $webGroupsModel::qb()
@@ -186,91 +184,177 @@ class Synchronization
     // $lastUpdate = $this->serverDb->createCommand("SELECT MAX(datetime) FROM ispp_sync WHERE action='update-students'")->queryScalar();
     // $lastUpdate = $lastUpdate ? $lastUpdate : date("Y-m-d H:i:s");
 
-    $localClientModel = new Client();
-    $local = $localClientModel::qb()
+    // Инициализация моделей
+    $localModel = new Client();
+    $webModel   = new IsppStudent();
+
+    // Выборка учащихся из таблицы ИС ПП
+    $localStudentsQuery = $localModel::qb()
       ->select([
         Client::tableName().'.IdOfClient',
         Client::tableName().'.ClientsGroupId',
         Client::tableName().'.Name',
         Client::tableName().'.SecondName',
-        Client::tableName().'.Surname'
+        Client::tableName().'.Surname',
+        Client::tableName().'.mobile'
       ])
-      ->innerJoin(ClientsGroup::tableName(), 'ClientsGroupId', '=', 'IdOfClientsGroup');
+      ->select([Client::tableName().'.Image'=>'internal_img'])
+      ->select(['clients_photo.ImageBytes'=>'external_img'])
+      ->leftJoin('clients_photo', Client::tableName().'.IdOfClient', '=', 'clients_photo.IdOfClient')
+      ->innerJoin(ClientsGroup::tableName(), 'ClientsGroupId', '=', 'IdOfClientsGroup')
+      ->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
+    $localStudents      = $localStudentsQuery->get();
+    $localStudentsCount = $localStudentsQuery->count();
 
-    Debug::debug('Количество записей '.$local->count());
+    // Количество учащихся в веб версии
+    $webStudentsCount = $webModel::qb()->count();
 
-    // Скрипт по полю LastUpdate обновляет данные
-    $query = "SELECT
-    `clients`.`IdOfClient`,
-    `clients`.`ClientsGroupId`,
-    `clients`.`Name`,
-    `clients`.`SecondName`,
-    `clients`.`Surname`,
-    (IF(CHAR_LENGTH(`clients`.`Image`)>0, 0, 1)) AS Photo,
-	(IF(CHAR_LENGTH(`clients`.`email`)>0, true, false) || IF(CHAR_LENGTH(`clients`.`mobile`)>0, true, false) || IF((SELECT COUNT(`guardians`.`ChildClientId`) FROM `guardians` WHERE `guardians`.`ChildClientId` = `clients`.`IdOfClient`)>0, true, false)) AS Notify
-    FROM `clients`
-      INNER JOIN `clients_groups`
-        ON `clients`.`ClientsGroupId` = `clients_groups`.`IdOfClientsGroup`
-    WHERE (`clients_groups`.`GroupType` = 1 OR `clients`.`ClientsGroupId` = 1100000060)";
-    //AND `clients`.`LastUpdate` >= '".$lastUpdate."'";
+    // Посчитать количество скрытых групп на текущий момент
+    $inactiveWebStudentsStartCount = $webModel::qb()->inactive()->count();
 
-    $students = $this->localDb->createCommand($query)->queryAll();
+    // Установить видимость 0 перед синхронизацией
+    $webModel::qb()->update(['state' => IsppStudent::STATE_INACTIVE]);
 
     $errors = 0;
-    foreach ($students as $student) {
+    $createdDataCount = 0;
+    $updatedDataCount = 0;
+    foreach ($localStudents as $localStudent) {
       try {
-        // Если ученик перенесен в группу выбывшие - поставить статус 0
-        if ($student['ClientsGroupId'] == '1100000060') {
-          $this->serverDb->createCommand()->update('{{%ispp_student}}',
-            [
-              "state" => 0,
-              "name" => $student['Name'],
-              "middlename" => $student['SecondName'],
-              "lastname" => $student['Surname'],
-              "photo" => $student['Photo'],
-              "notify" => $student['Notify']
-            ],
-            'system_id = '.$student['IdOfClient']
-          )->execute();
-          echo ".";
+        $webStudent = $webModel::qb()
+          ->find($localStudent->IdOfClient, 'system_id');
+
+        if ($webStudentsCount && $webStudent) {
+          $webModel::qb()
+            ->where(IsppStudent::tableName().'.system_id', '=', $localStudent->IdOfClient)
+            ->update([
+              'system_group_id' => $localStudent->ClientsGroupId,
+              'name'            => $localStudent->Name,
+              'middlename'      => $localStudent->SecondName,
+              'lastname'        => $localStudent->Surname,
+              'photo'           => $webStudent->photo || ($localStudent->internal_img != NULL || $localStudent->external_img != NULL),
+              'notify'          => $webStudent->notify || $this->checkStudentNotifications($localStudent->IdOfClient, ($localStudent->mobile ? 1 : 0)),
+              'state'           => IsppStudent::STATE_ACTIVE
+            ]);
+          $updatedDataCount++;
+          //echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Информация обновлена';
+        } else {
+          $webModel::qb()
+            ->insert([
+              'system_id'       => $localStudent->IdOfClient,
+              'system_group_id' => $localStudent->ClientsGroupId,
+              'name'            => $localStudent->Name,
+              'middlename'      => $localStudent->SecondName,
+              'lastname'        => $localStudent->Surname,
+              'photo'           => ($localStudent->internal_img != NULL || $localStudent->external_img != NULL),
+              'notify'          => $this->checkStudentNotifications($localStudent->IdOfClient, ($localStudent->mobile ? 1 : 0)),
+              'state'           => IsppStudent::STATE_ACTIVE
+            ]);
+          $createdDataCount++;
+          //echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Информация добавлена';
         }
-        // Если ученик новый, то нужно записать его в серверную БД
-        elseif ($this->serverDb->createCommand("SELECT * FROM ispp_student WHERE system_id=".$student['IdOfClient'])->queryOne()  === false) {
-          $this->serverDb->createCommand()->insert('{{%ispp_student}}',
-            [
-              'system_id = '.$student['IdOfClient'],
-              "system_group_id" => $student['ClientsGroupId'],
-              "name" => $student['Name'],
-              "middlename" => $student['SecondName'],
-              "lastname" => $student['Surname'],
-              "photo" => $student['Photo'],
-              "notify" => $student['Notify']
-            ]
-          )->execute();
-          echo ".";
-        }
-        // Если ученик не выбыл и не новый
-        else {
-          $this->serverDb->createCommand()->update('{{%ispp_student}}',
-            [
-              "system_group_id" => $student['ClientsGroupId'],
-              "name" => $student['Name'],
-              "middlename" => $student['SecondName'],
-              "lastname" => $student['Surname'],
-              "photo" => $student['Photo'],
-              "notify" => $student['Notify']
-            ],
-            'system_id = '.$student['IdOfClient']
-          )->execute();
-          echo ".";
-        }
-      } catch (Exception $e) {
-        echo "X";
+      } catch (\Exception $e) {
+        echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Ошибка подключения к БД';
         $errors++;
       }
     }
+    echo PHP_EOL;
+
+    // Посчитать количество скрытых учеников на момент окончания синхронизации
+    $inactiveWebStudentsFinishCount = $webModel::qb()->inactive()->count();
+    $hiddenStudentsCount = ($inactiveWebStudentsFinishCount-$inactiveWebStudentsStartCount);
+
+    // Отчет о синхронизации
+    echo 'Синхронизация идентификаторов групп выполнена.', PHP_EOL;
+    echo 'Общее количество учеников ', $localStudentsCount, PHP_EOL;
+    echo 'Количество созданных учеников ', $createdDataCount, PHP_EOL;
+    echo 'Количество обновленных учеников ', $updatedDataCount, PHP_EOL;
+    echo 'Количество скрытых учеников ', $hiddenStudentsCount, PHP_EOL;
+    echo 'Ошибок при соединении с БД ', $errors, PHP_EOL;
+
+    // Отправка уведомления
+    if ($this->notificationEnabled) {
+      //$this->notification->sendStudentsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
+    }
 
     // Запись в таблицу синхронизаций
+    $this->logSynchronizationInfo('update-students', $this->department_id, $errors);
+  }
+
+
+  /**
+   * Вынесено в основной запрос для оптимиации
+   *
+   * @param $student_system_id
+   * @return int
+   */
+  private function checkStudentPhoto($student_system_id)
+  {
+    $photo = Client::qb()
+      ->select([Client::tableName().'.IdOfClient'=>'id'])
+      ->select([Client::tableName().'.Image'=>'internal_img'])
+      ->select(['clients_photo.ImageBytes'=>'external_img'])
+      ->leftJoin('clients_photo', Client::tableName().'.IdOfClient', '=', 'clients_photo.IdOfClient')
+      ->where(Client::tableName().'.IdOfClient', '=', $student_system_id)
+      ->first();
+
+    if ($photo->internal_img != NULL || $photo->external_img != NULL) {
+      return 1;
+    }
+    return 0;
+  }
+
+
+  /**
+   * @param $student_system_id
+   * @param bool $studentHasMobile
+   * @return bool
+   */
+  private function checkStudentNotifications($student_system_id, $studentHasMobile = false)
+  {
+    $result = $studentHasMobile;
+
+    //$notify = Client::qb()->find($student_system_id, 'IdOfClient');
+    //if ($notify && $notify->mobile) {$result = true;}
+
+    $parentsQuery = Client::qb()
+      ->select([
+        Client::tableName().'.IdOfClient'     =>'id',
+        Client::tableName().'.ClientsGroupId' =>'group_system_id',
+        Client::tableName().'.phone',
+        Client::tableName().'.mobile',
+        Client::tableName().'.email',
+      ])
+      ->select([
+        'guardians.DeletedState'  =>'connection_state',
+        'guardians.IsDisabled'    =>'connection_disabled',
+      ])
+      ->leftJoin('guardians', Client::tableName().'.IdOfClient', '=', 'guardians.GuardianClientId')
+      ->where('guardians.ChildClientId', '=', $student_system_id);
+
+    if ($parentsQuery->count() > 0) {
+      $parents = $parentsQuery->get();
+      foreach ($parents as $parent) {
+        $parent_connection = 1;
+        if (!$parent->mobile) {
+          $parent_connection = 0;
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' без контактов';
+        }
+        if ($parent->connection_state == 1) {
+          $parent_connection = 0;
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная удаленной';
+        }
+        if ($parent->connection_disabled == 1) {
+          $parent_connection = 0;
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная устаревшей';
+        }
+        if ($parent->group_system_id == 1100000060 || $parent->group_system_id == 1100000070 || $parent->group_system_id == 1100000080) {
+          $parent_connection = 0;
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' из группы выбывшие/удаленные/перемещенные';
+        }
+        $result = $result || $parent_connection;
+      }
+    }
+    return $result;
   }
 
   /**
