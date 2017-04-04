@@ -301,38 +301,43 @@ class Synchronization
      *
      * Выбираем даты в которые происходили события и делаем цикл по датам
      * Даты находятся в промежутке от последней до текущей синхронизации
-     * TODO: Если даты не указаны нужно как-то указывать начальные данные связанные с текущим учебным годом
-     * TODO: Дата события не является выходным (воскресение)
-     * TODO: Дата события не является праздничным днем (массив)
-     * TODO: Дата события не попадает в промежуток каникул (массив)
+     * Если даты не указаны нужно как-то указывать начальные данные связанные с текущим учебным годом
+     * Дата события не является выходным (воскресение)
+     * Дата события не является праздничным днем (массив)
+     * Дата события не попадает в промежуток каникул (массив)
      *
      * Что является опозданием
-     * TODO: Условие, что код события '17', '112' лучше не делать, из-за того что турникеты иногда поворачивают в другую сторону
-     * TODO: Стоит отсечь коды событий отвечающих за поднос карты к считывателю на пункте охраны и/или администратора, т.к. это точно не опоздание
+     * Отсечь коды событий отвечающих за поднос карты к считывателю на пункте охраны и/или администратора, т.к. это точно не опоздание
      * Дата события = %Рассматриваемая дата%
      * Время события BETWEEN TIME('8:30:00') AND TIME('10:30:00')
      * Т.к. взаимодействие с этой системой будет происходить из разных ШО - необходимо брать события, которые относятся к текущему ШО (branch_id), чтобы не было двойной работы
      * И ученик не являтся тем, кто уже как-либо взаимодействовал с турникетов в эту дату в промежутке времени от BETWEEN TIME('6:30:00') AND TIME('8:29:59')
      *
-     * TODO: у некоторых классов уроки могут начинаться со второго или третьего (не обязательно по расписанию) - от этого будет зависеть время опоздания и первого взаимодействия
+     * TODO: [ver2] у некоторых классов уроки могут начинаться со второго или третьего (не обязательно по расписанию) - от этого будет зависеть время опоздания и первого взаимодействия
      *
      * TODO: [ver2] Дать возможность классным руководителям помечать опоздание уважительным с указанием причины
      * TODO: [ver2] Ввести признак домашнего обучения - для таких учеников опоздания не считаются
      */
 
-    // config
-    $educationConfig = [
-      'year_start'  => '2016-09-01',
-      'year_finish' => '2017-05-01',
-    ];
+    $qb = new QueryBuilderHandler();
+    $createdEventsCount = 0;
+    $latecomeEventsCount = 0;
 
     // Текущее время для записи в таблицу синхронизаций
     $now = new \DateTime('now', new \DateTimeZone('Europe/Moscow'));
     $newUpdateDatetime = $now->format('Y-m-d H:i:s');
 
     // Время последнего апдейта
-    $lastUpdate = IsppSync::qb()->find('update-events_'.$this->department_id, 'action');
-    $lastUpdateDatetime = $lastUpdate ? $lastUpdate->datetime : $educationConfig['year_start'].' 00:00:00';
+    $lastUpdateQuery = IsppSync::qb()
+      ->select($qb->raw('MAX(`datetime`) AS datetime'))
+      ->where('action', '=', 'update-events_'.$this->department_id);
+
+    $lastUpdateDatetime = '2000-01-01 00:00:00';
+    if ($lastUpdateQuery->count()>0) {
+      $lastUpdateDatetime = $lastUpdateQuery->first()->datetime;
+    } elseif($this->education) {
+      $lastUpdateDatetime = $this->education->getYearStart();
+    }
 
     // Все взаимодействия с турникетами между последним и текущим обновлением
     $localEventsQuery = Event::qb()
@@ -370,9 +375,9 @@ class Synchronization
       }
 
       $insertIds = IsppEvent::qb()->insert($dataForInsert);
+      $createdEventsCount = count($insertIds);
 
       // Выборка дат добавленных событий
-      $qb = new QueryBuilderHandler();
       $dateInterval = IsppEvent::qb()
         ->select($qb->raw('DATE(`datetime`) AS date'))
         ->select($qb->raw('COUNT(*) AS `events`'))
@@ -383,36 +388,41 @@ class Synchronization
       // Пометка событий опозданиями в цикле по дням
       // @see http://sqlinfo.ru/articles/info/18.html
       foreach ($dateInterval as $day) {
-        $latecomes = IsppEvent::qb()
-          ->selectDistinct([
-            IsppEvent::tableName().'.student_system_id'
-          ])
-          ->select($qb->raw("MIN(`ispp_event`.`datetime`) AS datetime"))
-          ->select($qb->raw("SUBSTR(MIN(CONCAT(`ispp_event`.`datetime`, `ispp_event`.`id`)), 20) as `id`"))
-          ->whereIn(IsppEvent::tableName().'.id', $insertIds)
-          ->where($qb->raw("DATE(`ispp_event`.`datetime`) = '".$day->date."'"))
-          ->having($qb->raw("MIN(TIME(`ispp_event`.`datetime`))"), 'BETWEEN', $qb->raw("TIME('8:30:00') AND TIME('10:30:00')"))
-          ->groupBy(IsppEvent::tableName().'.student_system_id')
-          ->get();
+        // Дальнейшее имеет смысл, только если дата является учебным днем
+        // Или если о расписании ничего неизвестно
+        if (($this->education != NULL && $this->education->checkDateAsHoliday($day->date) == true) == false) {
+          $latecomes = IsppEvent::qb()
+            ->selectDistinct([
+              IsppEvent::tableName().'.student_system_id'
+            ])
+            ->select($qb->raw("MIN(`ispp_event`.`datetime`) AS datetime"))
+            ->select($qb->raw("SUBSTR(MIN(CONCAT(`ispp_event`.`datetime`, `ispp_event`.`id`)), 20) as `id`"))
+            ->whereIn(IsppEvent::tableName().'.id', $insertIds)
+            ->where($qb->raw("DATE(`ispp_event`.`datetime`) = '".$day->date."'"))
+            ->having($qb->raw("MIN(TIME(`ispp_event`.`datetime`))"), 'BETWEEN', $qb->raw("TIME('8:30:00') AND TIME('10:30:00')"))
+            ->groupBy(IsppEvent::tableName().'.student_system_id')
+            ->get();
 
-        // Взять только ID тех событий, которые являются первыми
-        $latecomesIds = [];
-        foreach ($latecomes as $latecome) {
-          $latecomesIds[] = $latecome->id;
-        }
+          // Взять только ID тех событий, которые являются первыми
+          $latecomesIds = [];
+          foreach ($latecomes as $latecome) {
+            $latecomesIds[] = $latecome->id;
+          }
+          $latecomeEventsCount = count($latecomesIds);
 
-        // Установить опозданиям соответствуцющий тип
-        if ($latecomesIds) {
-          IsppEvent::qb()
-            ->whereIn('id', $latecomesIds)
-            ->update(['type' => IsppEvent::TYPE_LATECOME]);
+          // Установить опозданиям соответствуцющий тип
+          if ($latecomesIds) {
+            IsppEvent::qb()
+              ->whereIn('id', $latecomesIds)
+              ->update(['type' => IsppEvent::TYPE_LATECOME]);
+          }
         }
       }
     }
 
     // Отправка уведомления
     if ($this->notificationEnabled) {
-      //$this->notification->sendEventsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
+      $this->notification->sendEventsSynchronizationInfo($createdEventsCount, $latecomeEventsCount);
     }
 
     // Запись в таблицу синхронизаций
