@@ -259,7 +259,7 @@ class Synchronization
           //echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Информация добавлена';
         }
       } catch (\Exception $e) {
-        echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Ошибка подключения к БД';
+        echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Ошибка подключения к БД', PHP_EOL;
         $errors++;
       }
     }
@@ -486,19 +486,19 @@ class Synchronization
         $parent_connection = 1;
         if (!$parent->mobile) {
           $parent_connection = 0;
-          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' без контактов';
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' без контактов', PHP_EOL;
         }
         if ($parent->connection_state == 1) {
           $parent_connection = 0;
-          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная удаленной';
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная удаленной', PHP_EOL;
         }
         if ($parent->connection_disabled == 1) {
           $parent_connection = 0;
-          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная устаревшей';
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная устаревшей', PHP_EOL;
         }
         if ($parent->group_system_id == 1100000060 || $parent->group_system_id == 1100000070 || $parent->group_system_id == 1100000080) {
           $parent_connection = 0;
-          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' из группы выбывшие/удаленные/перемещенные';
+          echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' из группы выбывшие/удаленные/перемещенные', PHP_EOL;
         }
         $result = $result || $parent_connection;
       }
