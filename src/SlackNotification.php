@@ -27,8 +27,8 @@ class SlackNotification
   /** @var array Department data */
   private $department;
 
-  protected $message_text_prefix;
-  protected $message_title;
+  private $message_text_prefix;
+  private $message_title;
 
 
   /**
@@ -43,17 +43,15 @@ class SlackNotification
     // Инициализация Slack клиента
     if (array_key_exists('webhook', $config)) {
       $webhook = $config['webhook'];
-      $options = array_key_exists('options', $config) ? $config['options'] : [];
-
       $this->slack = new Client($webhook, $options);
 
       // Проверка корректности URI
-      $guzzle = new \GuzzleHttp\Client();
-      try {
-        $guzzle->head($webhook);
-      } catch(ConnectException $e) {
-        throw new \Exception('Не удалось установить соединение со Slack сервисом.', $e->getCode(), $e);
-      }
+      //$guzzle = new \GuzzleHttp\Client();
+      //try {
+      //  $guzzle->head($webhook);
+      //} catch(ConnectException $e) {
+      //  throw new \Exception('Не удалось установить соединение со Slack сервисом.', $e->getCode(), $e);
+      //}
     } else {
       throw new \Exception('Не установлено значение для webhook.');
     }
