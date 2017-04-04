@@ -13,12 +13,12 @@ extensions:
     enabled:
         - Codeception\Extension\RunFailed
 modules:
-    config:
-        Db:
-          dsn: 'mysql:host=127.0.0.1'
-          user: 'root'
-          password: ''
-          dump: 'tests/_data/dump.sql'
-          populate: true
-          cleanup: false
-          reconnect: false
+    enabled:
+        - Db:
+            dsn: 'mysql:host=127.0.0.1;dbname=ispp-iseduc-test'
+            user: 'root'
+            password: ''
+            dump: 'tests/_data/web_dump.sql'
+            populate: true
+            cleanup: true
+            reconnect: true

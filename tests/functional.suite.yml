@@ -9,12 +9,6 @@
 class_name: FunctionalTester
 modules:
     enabled:
-        - Db:
-            dsn: 'mysql:host=127.0.0.1;dbname=ispp-iseduc-test'
-            user: 'root'
-            password: ''
-            dump: 'tests/_data/dump.sql'
-            populate: true
-            cleanup: true
-            reconnect: true
+        - Asserts
         - \Helper\Functional
+        - Db
