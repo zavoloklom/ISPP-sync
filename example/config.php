@@ -14,6 +14,14 @@ return (array) array(
     'name'    => '',
     'address' => ''
   ],
+  'education' => [
+    'year_start'  => '',
+    'year_finish' => '',
+    'isSaturdayAreHoliday' => false,
+    'isSundayAreHoliday' => true,
+    'holidays' => [],
+    'vacationIntervals' => []
+  ],
   'local_server' => [
     'adapter' => '',
     'options' => [
