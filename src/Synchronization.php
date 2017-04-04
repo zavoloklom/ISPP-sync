@@ -8,9 +8,12 @@
 namespace zavoloklom\ispp\sync\src;
 
 use Pixie\Connection;
+use Pixie\QueryBuilder;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 use zavoloklom\ispp\sync\src\models\Client;
 use zavoloklom\ispp\sync\src\models\ClientsGroup;
+use zavoloklom\ispp\sync\src\models\Event;
+use zavoloklom\ispp\sync\src\models\IsppEvent;
 use zavoloklom\ispp\sync\src\models\IsppGroup;
 use zavoloklom\ispp\sync\src\models\IsppStudent;
 use zavoloklom\ispp\sync\src\models\IsppSync;
@@ -26,7 +29,6 @@ class Synchronization
   const ACTION_GROUPS   = 'groups';
   const ACTION_STUDENTS = 'students';
   const ACTION_EVENTS   = 'events';
-  const ACTION_ALL      = 'all';
 
   /** @var boolean */
   public $notificationEnabled = false;
@@ -281,6 +283,137 @@ class Synchronization
     $this->logSynchronizationInfo('update-students', $this->department_id, $errors);
   }
 
+  /**
+   * Events synchronization
+   */
+  public function events()
+  {
+    /**
+     * Как это должно работать
+     * Сначала мы перетаскиваем все события в локальную БД
+     * На этом этапе отфильтровываются проходы не учеников, но это не обязательно - просто немного сокращаем количество
+     *
+     * Дальнейшая обработка идет в веб таблице из-за того, что есть возможность настривать индексы так как надо
+     * TODO: [ver2] хранить дату в трех (или двух) столбцах - date, time и возможно datetime, это позволит сделать индекс на дату и быстрее выбирать то, что нужно
+     *
+     * Выбираем даты в которые происходили события и делаем цикл по датам
+     * Даты находятся в промежутке от последней до текущей синхронизации
+     * TODO: Если даты не указаны нужно как-то указывать начальные данные связанные с текущим учебным годом
+     * TODO: Дата события не является выходным (воскресение)
+     * TODO: Дата события не является праздничным днем (массив)
+     * TODO: Дата события не попадает в промежуток каникул (массив)
+     *
+     * Что является опозданием
+     * TODO: Условие, что код события '17', '112' лучше не делать, из-за того что турникеты иногда поворачивают в другую сторону
+     * TODO: Стоит отсечь коды событий отвечающих за поднос карты к считывателю на пункте охраны и/или администратора, т.к. это точно не опоздание
+     * Дата события = %Рассматриваемая дата%
+     * Время события BETWEEN TIME('8:30:00') AND TIME('10:30:00')
+     * Т.к. взаимодействие с этой системой будет происходить из разных ШО - необходимо брать события, которые относятся к текущему ШО (branch_id), чтобы не было двойной работы
+     * И ученик не являтся тем, кто уже как-либо взаимодействовал с турникетов в эту дату в промежутке времени от BETWEEN TIME('6:30:00') AND TIME('8:29:59')
+     *
+     * TODO: у некоторых классов уроки могут начинаться со второго или третьего (не обязательно по расписанию) - от этого будет зависеть время опоздания и первого взаимодействия
+     *
+     * TODO: [ver2] Дать возможность классным руководителям помечать опоздание уважительным с указанием причины
+     * TODO: [ver2] Ввести признак домашнего обучения - для таких учеников опоздания не считаются
+     */
+
+    // config
+    $educationConfig = [
+      'year_start'  => '2016-09-01',
+      'year_finish' => '2017-05-01',
+    ];
+
+    // Текущее время для записи в таблицу синхронизаций
+    $now = new \DateTime('now', new \DateTimeZone('Europe/Moscow'));
+    $newUpdateDatetime = $now->format('Y-m-d H:i:s');
+
+    // Время последнего апдейта
+    $lastUpdate = IsppSync::qb()->find('update-events_'.$this->department_id, 'action');
+    $lastUpdateDatetime = $lastUpdate ? $lastUpdate->datetime : $educationConfig['year_start'].' 00:00:00';
+
+    // Все взаимодействия с турникетами между последним и текущим обновлением
+    $localEvents = Event::qb()
+      ->select([
+        Event::tableName().'.IdOfEnterEvent',
+        Event::tableName().'.IdOfClient',
+        Event::tableName().'.TurnstileAddr',
+        Event::tableName().'.PassDirection',
+        Event::tableName().'.EventCode',
+        Event::tableName().'.EvtDateTime'
+      ])
+      ->turnstileEvents()
+      ->doneByStudents()
+      ->whereNotNull(Event::tableName().'.IdOfClient')
+      ->whereNotNull(Event::tableName().'.EvtDateTime')
+      ->whereBetween(Event::tableName().'.EvtDateTime', $lastUpdateDatetime, $newUpdateDatetime)
+      ->orderBy(Event::tableName().'.EvtDateTime', 'ASC')
+      ->get();
+
+    // Нужно записать эти данные в веб версию
+    $dataForInsert = [];
+    foreach ($localEvents as $localEvent) {
+      $dataForInsert[] = [
+        'system_id'         => $localEvent->IdOfEnterEvent,
+        'student_system_id' => $localEvent->IdOfClient,
+        'turnstile'         => $localEvent->TurnstileAddr,
+        'direction'         => $localEvent->PassDirection,
+        'code'              => $localEvent->EventCode,
+        'datetime'          => $localEvent->EvtDateTime,
+        'branch_id'         => $this->department_id
+      ];
+    }
+
+    $insertIds = IsppEvent::qb()->insert($dataForInsert);
+
+    // Выборка дат добавленных событий
+    $qb = new QueryBuilderHandler();
+    $dateInterval = IsppEvent::qb()
+      ->select($qb->raw('DATE(`datetime`) AS date'))
+      ->select($qb->raw('COUNT(*) AS `events`'))
+      ->whereIn('id', $insertIds)
+      ->groupBy('date')
+      ->get();
+
+    // Пометка событий опозданиями в цикле по дням
+    foreach ($dateInterval as $day) {
+      $latecomes = IsppEvent::qb()
+        ->select([
+          IsppEvent::tableName().'.id',
+          IsppEvent::tableName().'.system_id',
+          IsppEvent::tableName().'.student_system_id'
+        ])
+        ->whereIn(IsppEvent::tableName().'.id', $insertIds)
+        ->where($qb->raw("DATE(`ispp_event`.`datetime`) = '".$day->date."'"))
+        ->where($qb->raw('TIME(`ispp_event`.`datetime`) BETWEEN TIME(\'8:30:00\') AND TIME(\'10:30:00\')'))
+        ->groupBy(IsppEvent::tableName().'.id')
+        ->groupBy(IsppEvent::tableName().'.student_system_id')
+        ->orderBy(IsppEvent::tableName().'.datetime', 'ASC')
+        ->get();
+      //       AND `ispp_event`.`student_system_id` NOT IN (SELECT `student_system_id` FROM `ispp_event` WHERE DATE(`datetime`) = DATE('".$event['date']."') AND (TIME(`datetime`) BETWEEN TIME('6:30:00') AND TIME('8:29:59')) GROUP BY `student_system_id`)
+
+      // Взять только ID
+      $latecomesIds = [];
+      foreach ($latecomes as $latecome) {
+        $latecomesIds[] = $latecome->id;
+      }
+
+      // Установить опозданиям соответствуцющий тип
+      if ($latecomesIds) {
+        IsppEvent::qb()
+          ->whereIn('id', $latecomesIds)
+          ->update(['type' => IsppEvent::TYPE_LATECOME]);
+      }
+    }
+
+    // Отправка уведомления
+    if ($this->notificationEnabled) {
+      //$this->notification->sendStudentsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
+    }
+
+    // Запись в таблицу синхронизаций
+    $this->logSynchronizationInfo('update-events', $this->department_id, 0, $newUpdateDatetime);
+
+  }
 
   /**
    * Вынесено в основной запрос для оптимиации
@@ -358,24 +491,6 @@ class Synchronization
     return $result;
   }
 
-  /**
-   * Events synchronization
-   */
-  public function events()
-  {
-    echo 'Events Action';
-  }
-
-  /**
-   * All synchronization
-   */
-  public function all()
-  {
-    $this->groups();
-    $this->students();
-    $this->events();
-  }
-
 
   /**
    * @param $action
@@ -407,8 +522,7 @@ class Synchronization
     return [
       self::ACTION_GROUPS,
       self::ACTION_STUDENTS,
-      self::ACTION_EVENTS,
-      self::ACTION_ALL
+      self::ACTION_EVENTS
     ];
   }
 
