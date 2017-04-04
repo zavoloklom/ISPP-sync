@@ -105,8 +105,9 @@ class Synchronization
     $localGroupsModel = new ClientsGroup();
     $localGroups = $localGroupsModel::qb()
       ->select([
-        'IdOfClientsGroup',
-        'Name'
+        ClientsGroup::tableName().'.IdOfClientsGroup',
+        ClientsGroup::tableName().'.Name',
+        ClientsGroup::tableName().'.DisablePlanCreation'
       ])
       ->schoolClasses()
       ->get();
@@ -136,6 +137,7 @@ class Synchronization
             ->update([
               'system_id' => $localGroup->IdOfClientsGroup,
               'modified'  => date("Y-m-d H:i:s"),
+              'branch_id' => ($webGroup->branch_id != NULL) ? $webGroup->branch_id : ($localGroup->DisablePlanCreation == 1 ? NULL : $this->department_id),
               'state'     => IsppGroup::STATE_ACTIVE
             ]);
           $updatedGroupsCount++;
@@ -144,6 +146,7 @@ class Synchronization
             ->insert([
               'system_id' => $localGroup->IdOfClientsGroup,
               'name'      => $localGroup->Name,
+              'branch_id' => $localGroup->DisablePlanCreation == 1 ? NULL : $this->department_id,
               'created'   => date("Y-m-d H:i:s"),
               'state'     => IsppGroup::STATE_ACTIVE
             ]);
