@@ -332,7 +332,7 @@ class Synchronization
     $lastUpdateDatetime = $lastUpdate ? $lastUpdate->datetime : $educationConfig['year_start'].' 00:00:00';
 
     // Все взаимодействия с турникетами между последним и текущим обновлением
-    $localEvents = Event::qb()
+    $localEventsQuery = Event::qb()
       ->select([
         Event::tableName().'.IdOfEnterEvent',
         Event::tableName().'.IdOfClient',
@@ -346,68 +346,70 @@ class Synchronization
       ->whereNotNull(Event::tableName().'.IdOfClient')
       ->whereNotNull(Event::tableName().'.EvtDateTime')
       ->whereBetween(Event::tableName().'.EvtDateTime', $lastUpdateDatetime, $newUpdateDatetime)
-      ->orderBy(Event::tableName().'.EvtDateTime', 'ASC')
-      ->get();
+      ->orderBy(Event::tableName().'.EvtDateTime', 'ASC');
 
-    // Нужно записать эти данные в веб версию
-    $dataForInsert = [];
-    foreach ($localEvents as $localEvent) {
-      $dataForInsert[] = [
-        'system_id'         => $localEvent->IdOfEnterEvent,
-        'student_system_id' => $localEvent->IdOfClient,
-        'turnstile'         => $localEvent->TurnstileAddr,
-        'direction'         => $localEvent->PassDirection,
-        'code'              => $localEvent->EventCode,
-        'datetime'          => $localEvent->EvtDateTime,
-        'branch_id'         => $this->department_id
-      ];
-    }
+    // Дальнейшее имеет смысл только если есть такие записи
+    if ($localEventsQuery->count() > 0) {
 
-    $insertIds = IsppEvent::qb()->insert($dataForInsert);
-
-    // Выборка дат добавленных событий
-    $qb = new QueryBuilderHandler();
-    $dateInterval = IsppEvent::qb()
-      ->select($qb->raw('DATE(`datetime`) AS date'))
-      ->select($qb->raw('COUNT(*) AS `events`'))
-      ->whereIn('id', $insertIds)
-      ->groupBy('date')
-      ->get();
-
-    // Пометка событий опозданиями в цикле по дням
-    foreach ($dateInterval as $day) {
-      $latecomes = IsppEvent::qb()
-        ->select([
-          IsppEvent::tableName().'.id',
-          IsppEvent::tableName().'.system_id',
-          IsppEvent::tableName().'.student_system_id'
-        ])
-        ->whereIn(IsppEvent::tableName().'.id', $insertIds)
-        ->where($qb->raw("DATE(`ispp_event`.`datetime`) = '".$day->date."'"))
-        ->where($qb->raw('TIME(`ispp_event`.`datetime`) BETWEEN TIME(\'8:30:00\') AND TIME(\'10:30:00\')'))
-        ->groupBy(IsppEvent::tableName().'.id')
-        ->groupBy(IsppEvent::tableName().'.student_system_id')
-        ->orderBy(IsppEvent::tableName().'.datetime', 'ASC')
-        ->get();
-      //       AND `ispp_event`.`student_system_id` NOT IN (SELECT `student_system_id` FROM `ispp_event` WHERE DATE(`datetime`) = DATE('".$event['date']."') AND (TIME(`datetime`) BETWEEN TIME('6:30:00') AND TIME('8:29:59')) GROUP BY `student_system_id`)
-
-      // Взять только ID
-      $latecomesIds = [];
-      foreach ($latecomes as $latecome) {
-        $latecomesIds[] = $latecome->id;
+      // Нужно записать эти данные в веб версию
+      $localEvents = $localEventsQuery->get();
+      $dataForInsert = [];
+      foreach ($localEvents as $localEvent) {
+        $dataForInsert[] = [
+          'system_id'         => $localEvent->IdOfEnterEvent,
+          'student_system_id' => $localEvent->IdOfClient,
+          'turnstile'         => $localEvent->TurnstileAddr,
+          'direction'         => $localEvent->PassDirection,
+          'code'              => $localEvent->EventCode,
+          'datetime'          => $localEvent->EvtDateTime,
+          'branch_id'         => $this->department_id
+        ];
       }
 
-      // Установить опозданиям соответствуцющий тип
-      if ($latecomesIds) {
-        IsppEvent::qb()
-          ->whereIn('id', $latecomesIds)
-          ->update(['type' => IsppEvent::TYPE_LATECOME]);
+      $insertIds = IsppEvent::qb()->insert($dataForInsert);
+
+      // Выборка дат добавленных событий
+      $qb = new QueryBuilderHandler();
+      $dateInterval = IsppEvent::qb()
+        ->select($qb->raw('DATE(`datetime`) AS date'))
+        ->select($qb->raw('COUNT(*) AS `events`'))
+        ->whereIn('id', $insertIds)
+        ->groupBy('date')
+        ->get();
+
+      // Пометка событий опозданиями в цикле по дням
+      // @see http://sqlinfo.ru/articles/info/18.html
+      foreach ($dateInterval as $day) {
+        $latecomes = IsppEvent::qb()
+          ->selectDistinct([
+            IsppEvent::tableName().'.student_system_id'
+          ])
+          ->select($qb->raw("MIN(`ispp_event`.`datetime`) AS datetime"))
+          ->select($qb->raw("SUBSTR(MIN(CONCAT(`ispp_event`.`datetime`, `ispp_event`.`id`)), 20) as `id`"))
+          ->whereIn(IsppEvent::tableName().'.id', $insertIds)
+          ->where($qb->raw("DATE(`ispp_event`.`datetime`) = '".$day->date."'"))
+          ->having($qb->raw("MIN(TIME(`ispp_event`.`datetime`))"), 'BETWEEN', $qb->raw("TIME('8:30:00') AND TIME('10:30:00')"))
+          ->groupBy(IsppEvent::tableName().'.student_system_id')
+          ->get();
+
+        // Взять только ID тех событий, которые являются первыми
+        $latecomesIds = [];
+        foreach ($latecomes as $latecome) {
+          $latecomesIds[] = $latecome->id;
+        }
+
+        // Установить опозданиям соответствуцющий тип
+        if ($latecomesIds) {
+          IsppEvent::qb()
+            ->whereIn('id', $latecomesIds)
+            ->update(['type' => IsppEvent::TYPE_LATECOME]);
+        }
       }
     }
 
     // Отправка уведомления
     if ($this->notificationEnabled) {
-      //$this->notification->sendStudentsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
+      //$this->notification->sendEventsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
     }
 
     // Запись в таблицу синхронизаций
