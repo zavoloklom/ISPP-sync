@@ -1,6 +1,7 @@
 <?php
 
 use zavoloklom\ispp\sync\src\Synchronization;
+use Codeception\Util\Fixtures;
 
 /**
  * Class SynchronizationStudentsFunctionalTest
@@ -41,7 +42,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
   public function testStudentsActionInsertDataToWebServer()
   {
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
@@ -70,7 +71,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     }
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
@@ -99,7 +100,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1009, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
@@ -127,7 +128,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1040, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'state'=>1]);
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
@@ -157,7 +158,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1013, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'photo'=>1]);
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
@@ -182,7 +183,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
   public function testStudentsActionCheckStudentNotificationsOnInsert()
   {
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
@@ -217,7 +218,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1013, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'notify'=>0]);
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки

@@ -1,6 +1,7 @@
 <?php
 
 use zavoloklom\ispp\sync\src\Synchronization;
+use Codeception\Util\Fixtures;
 
 /**
  * Class SynchronizationGroupsFunctionalTest
@@ -35,7 +36,7 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
   public function testGroupsActionInsertDataToWebServer()
   {
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->groups();
 
     // Проверки
@@ -72,7 +73,7 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '3-В', 'system_id'=>9]);
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->groups();
 
     // Проверки
@@ -103,7 +104,7 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->groups();
 
     // Проверки
@@ -132,7 +133,7 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '12-Я', 'system_id'=>1000000001, 'state'=>1]);
 
     // Выполнение команды
-    $sync = new Synchronization();
+    $sync = Fixtures::get('sync');
     $sync->groups();
 
     // Проверки
