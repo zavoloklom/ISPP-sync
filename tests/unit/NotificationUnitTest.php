@@ -41,12 +41,12 @@ class NotificationUnitTest extends \Codeception\Test\Unit
    * Для конфига где 'webhook' принимает значение неправльного адреса
    * Должно быть проброшено исключение
    */
-  public function testNotificationClassThrowExceptionWhenSlackWebhookUriIsWrong()
-  {
-    $this->tester->expectException(\Exception::class, function() {
-      new SlackNotification(['webhook' => 'test.test']);
-    });
-  }
+  //public function testNotificationClassThrowExceptionWhenSlackWebhookUriIsWrong()
+  //{
+  //  $this->tester->expectException(\Exception::class, function() {
+  //    new SlackNotification(['webhook' => 'test.test']);
+  //  });
+  //}
 
   /**
    * Для конфига где 'webhook' принимает значение правльного адреса
