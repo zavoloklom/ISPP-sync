@@ -411,7 +411,7 @@ class Synchronization
           foreach ($latecomes as $latecome) {
             $latecomesIds[] = $latecome->id;
           }
-          $latecomeEventsCount = count($latecomesIds);
+          $latecomeEventsCount += count($latecomesIds);
 
           // Установить опозданиям соответствуцющий тип
           if ($latecomesIds) {
