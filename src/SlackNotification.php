@@ -190,4 +190,36 @@ class SlackNotification
       ]])
       ->send();
   }
+
+  /**
+   * @param integer $createdEventsCount   Количество добавленных событий в процессе синхронизации
+   * @param integer $latecomeEventsCount  Количество опозданий выявленных в процессе синхронизации
+   */
+  public function sendEventsSynchronizationInfo($createdEventsCount, $latecomeEventsCount)
+  {
+    $message = $this->slack->createMessage();
+    $message
+      ->setText($this->message_text_prefix.' - Синхронизация событий завершена')
+      ->setAttachments([[
+        'fallback' => 'Синхронизация событий завершена',
+        'title'  => $this->message_title,
+        'text' => 'Синхронизация событий завершена:',
+        'color' => 'good',
+        'fields' => [
+          [
+            'title' => 'Добавлено событий',
+            'value' => $createdEventsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Кол-во опозданий',
+            'value' => $latecomeEventsCount,
+            'short' => true
+          ]
+        ],
+        'footer' => 'ISEduC API',
+        'footer_icon' => 'http://1534.org/icons/favicon-32x32.png'
+      ]])
+      ->send();
+  }
 }
