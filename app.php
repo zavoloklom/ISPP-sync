@@ -6,6 +6,8 @@
 
 use zavoloklom\ispp\sync\src\Helper;
 use zavoloklom\ispp\sync\src\Synchronization;
+use zavoloklom\ispp\sync\src\SlackNotification;
+use zavoloklom\ispp\sync\src\Education;
 
 set_time_limit(0);
 //error_reporting(E_ALL & ~E_NOTICE);
@@ -26,8 +28,11 @@ Helper::printLogo();
 $sync = new Synchronization();
 $sync->department_id = array_key_exists('department', CONFIG) ? CONFIG['department']['id'] : 0;
 
+// Setup education schedule
+$sync->education = array_key_exists('education', CONFIG) ? new Education(CONFIG['education']) : NULL;
+
 // Setup notification system
-if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new \zavoloklom\ispp\sync\src\SlackNotification(CONFIG['slack'], CONFIG)) {
+if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new SlackNotification(CONFIG['slack'], CONFIG)) {
   $sync->notification = $notification;
   $sync->notificationEnabled = true;
 }

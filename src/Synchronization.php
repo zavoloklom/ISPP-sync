@@ -39,6 +39,9 @@ class Synchronization
   /** @var integer The Id of department for synchronization log table */
   public $department_id = 0;
 
+  /** @var  Education object with schedule */
+  public $education;
+
   /**
    * Тестирование установки соединения
    *
