@@ -42,7 +42,7 @@ class SynchronizationEventsFunctionalTest extends \Codeception\Test\Unit
     $sync->events();
 
     // Проверки
-    $this->tester->seeNumRecords(14, 'ispp-iseduc-test.ispp_event');
+    $this->tester->seeNumRecords(18, 'ispp-iseduc-test.ispp_event');
     $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10004]);
     $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10015]);
     $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10001]);
@@ -67,7 +67,7 @@ class SynchronizationEventsFunctionalTest extends \Codeception\Test\Unit
     $sync->events();
 
     // Проверки
-    $this->tester->seeNumRecords(8, 'ispp-iseduc-test.ispp_event');
+    $this->tester->seeNumRecords(12, 'ispp-iseduc-test.ispp_event');
     $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10008]);
     $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10007]);
   }
@@ -125,5 +125,29 @@ class SynchronizationEventsFunctionalTest extends \Codeception\Test\Unit
     $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10011, 'type'=>0]);
     $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10015, 'type'=>0]);
     $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10014, 'type'=>0]);
+  }
+
+  /**
+   * Есть записи в ИС ПП
+   * Присутсвуют некоторые события в веб версии (с наличием и отсутсвием признака опозданий)
+   * Вызывается метод events
+   * Событие не является опозданием - Ученик уже был в школе в этот день
+   * Событие не является опозданием - Ученик уже был в школе в этот день
+   */
+  public function testEventsActionCheckStudentLatecomeAfterSynchronizationAtTheSameDay()
+  {
+    // Начальный набор
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10018, 'student_system_id'=>1001, 'branch_id'=>0, 'direction'=>0, 'code'=>17, 'datetime'=>'2016-10-19 08:15:00', 'type'=>0]);
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10020, 'student_system_id'=>1002, 'branch_id'=>0, 'direction'=>0, 'code'=>17, 'datetime'=>'2016-10-19 09:10:00', 'type'=>1]);
+
+    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_sync', ['action'=>'update-events_0', 'errors'=>0, 'datetime'=>'2016-10-19 09:00:00']);
+
+    // Выполнение команды
+    $sync = Fixtures::get('sync');
+    $sync->events();
+
+    // Проверки
+    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10019, 'type'=>0]);
+    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_event', ['system_id'=>10021, 'type'=>0]);
   }
 }

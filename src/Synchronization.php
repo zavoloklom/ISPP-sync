@@ -400,7 +400,7 @@ class Synchronization
             ])
             ->select($qb->raw("MIN(`ispp_event`.`datetime`) AS datetime"))
             ->select($qb->raw("SUBSTR(MIN(CONCAT(`ispp_event`.`datetime`, `ispp_event`.`id`)), 20) as `id`"))
-            ->whereIn(IsppEvent::tableName().'.id', $insertIds)
+            ->where(IsppEvent::tableName().'.branch_id', '=', $this->department_id)
             ->where($qb->raw("DATE(`ispp_event`.`datetime`) = '".$day->date."'"))
             ->having($qb->raw("MIN(TIME(`ispp_event`.`datetime`))"), 'BETWEEN', $qb->raw("TIME('8:30:00') AND TIME('10:30:00')"))
             ->groupBy(IsppEvent::tableName().'.student_system_id')
