@@ -19,10 +19,13 @@
       "zavoloklom\\ispp\\sync\\": ""
     }
   },
+  "scripts": {
+    "post-install-cmd": "php app.php help"
+  },
   "require": {
     "php": ">=5.6.0",
     "usmanhalalit/pixie": "2.*@dev",
-    "maknz/slack": "dev-master"
+    "maknz/slack": "1.*@dev"
   },
   "require-dev": {
     "codeception/codeception": "^2.2.0",
