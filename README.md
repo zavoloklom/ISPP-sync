@@ -5,6 +5,7 @@
   * OpenSSL
   * openssl.cafile= C:/PHP/cacert.pem
   * Curl
+  * mbstring
   * Все что касается подключений к БД
 * Создать папку на диске `C` с содержимым этого репозитория
 * Скачать в эту папку composer
