@@ -4,7 +4,7 @@ use zavoloklom\ispp\sync\src\Synchronization;
 use zavoloklom\ispp\sync\src\SlackNotification;
 use zavoloklom\ispp\sync\src\Education;
 
-define('CONFIG', include_once(__DIR__ . '\config.php'));
+define('CONFIG', include_once(__DIR__ . '/config.php'));
 
 // Setup application (как в файле app.php)
 $sync = new Synchronization();
