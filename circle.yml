@@ -1,0 +1,17 @@
+machine:
+  php:
+    version: 7.1.0
+
+general:
+  branches: # list of branches to build
+    only:
+      - master
+      - develop
+      - /release-.*/
+
+test:
+  override:
+    - codecept run --coverage --coverage-xml
+  post:
+    - bash <(curl -s https://codecov.io/bash) -t 136e079e-d1e7-4472-baf0-49d6f8e7c10e
+

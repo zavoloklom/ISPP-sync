@@ -22,3 +22,7 @@ modules:
             populate: true
             cleanup: true
             reconnect: true
+coverage:
+    enabled: true
+    include:
+        - src/*
