@@ -8,7 +8,6 @@
 namespace zavoloklom\ispp\sync\src;
 
 use Pixie\Connection;
-use Pixie\QueryBuilder;
 use Pixie\QueryBuilder\QueryBuilderHandler;
 use zavoloklom\ispp\sync\src\models\Client;
 use zavoloklom\ispp\sync\src\models\ClientsGroup;
@@ -93,12 +92,12 @@ class Synchronization
     return true;
   }
 
-
   /**
    * Groups synchronization
    */
   public function groups()
   {
+    $script_start = microtime(true);
     echo 'Синхронизация идентификаторов групп', PHP_EOL, PHP_EOL;
 
     // Выборка нужных групп из таблицы ИС ПП
@@ -141,6 +140,7 @@ class Synchronization
               'state'     => IsppGroup::STATE_ACTIVE
             ]);
           $updatedGroupsCount++;
+          //echo '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Информация обновлена';
         } else {
           $webGroupsModel::qb()
             ->insert([
@@ -152,13 +152,19 @@ class Synchronization
             ]);
           $createdGroupsCount++;
         }
-        echo '.';
+        //echo '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Информация добавлена';
       } catch (\Exception $e) {
-        echo 'X';
+        echo '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Ошибка подключения к БД', PHP_EOL;
         $errors++;
       }
     }
     echo PHP_EOL;
+
+    // Информация по данному скрипту
+    $script_finish = microtime(true);
+    $script_execution_datetime = new \DateTime('@'.(int)($script_finish - $script_start));
+    $script_time = $script_execution_datetime->format("i минут s секунд");
+    $script_memory_peak = round(memory_get_peak_usage() / 1024 / 1024, 2);
 
     // Посчитать количество скрытых групп на момент окончания
     $inactiveWebGroupsFinishCount = $webGroupsModel::qb()->inactive()->count();
@@ -170,23 +176,27 @@ class Synchronization
     echo 'Количество созданных групп ', $createdGroupsCount, PHP_EOL;
     echo 'Количество обновленных групп ', $updatedGroupsCount, PHP_EOL;
     echo 'Количество скрытых групп ', $hiddenGroupsCount, PHP_EOL;
-    echo 'Ошибок при соединении с БД ', $errors, PHP_EOL;
+    echo 'Ошибок при соединении с БД ', $errors, PHP_EOL, PHP_EOL;
+
+    echo 'Время выполнения синхронизации ', $script_time, PHP_EOL;
+    echo 'Пиковое потребление памяти ', $script_memory_peak, ' Мб', PHP_EOL, PHP_EOL;
 
     // Отправка уведомления
     if ($this->notificationEnabled) {
-      $this->notification->sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount, $errors);
+      $this->notification->sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount, $errors, $script_time, $script_memory_peak);
+      echo 'Уведомление в Slack отправлено', PHP_EOL;
     }
 
     // Запись в таблицу синхронизаций
     $this->logSynchronizationInfo('update-groups', $this->department_id, $errors);
   }
 
-
   /**
    * Students synchronization
    */
   public function students()
   {
+    $script_start = microtime(true);
     echo 'Синхронизация идентификаторов учеников', PHP_EOL, PHP_EOL;
 
     // Нужно продумать как без особых усилий можно было бы обновлять статус ученика
@@ -268,8 +278,14 @@ class Synchronization
     }
     echo PHP_EOL;
 
+    // Информация по данному скрипту
+    $script_finish = microtime(true);
+    $script_execution_datetime = new \DateTime('@'.(int)($script_finish - $script_start));
+    $script_time = $script_execution_datetime->format("i минут s секунд");
+    $script_memory_peak = round(memory_get_peak_usage() / 1024 / 1024, 2);
+
     // Посчитать количество скрытых учеников на момент окончания синхронизации
-    $inactiveWebStudentsFinishCount = $webModel::qb()->inactive()->count();
+    $inactiveWebStudentsFinishCount = IsppStudent::qb()->inactive()->count();
     $hiddenStudentsCount = ($inactiveWebStudentsFinishCount-$inactiveWebStudentsStartCount);
 
     // Отчет о синхронизации
@@ -278,11 +294,15 @@ class Synchronization
     echo 'Количество созданных учеников ', $createdDataCount, PHP_EOL;
     echo 'Количество обновленных учеников ', $updatedDataCount, PHP_EOL;
     echo 'Количество скрытых учеников ', $hiddenStudentsCount, PHP_EOL;
-    echo 'Ошибок при соединении с БД ', $errors, PHP_EOL;
+    echo 'Ошибок при соединении с БД ', $errors, PHP_EOL, PHP_EOL;
+
+    echo 'Время выполнения синхронизации ', $script_time, PHP_EOL;
+    echo 'Пиковое потребление памяти ', $script_memory_peak, ' Мб', PHP_EOL, PHP_EOL;
 
     // Отправка уведомления
     if ($this->notificationEnabled) {
-      $this->notification->sendStudentsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors);
+      $this->notification->sendStudentsSynchronizationInfo($createdDataCount, $updatedDataCount, $hiddenStudentsCount, $errors, $script_time, $script_memory_peak);
+      echo 'Уведомление в Slack отправлено', PHP_EOL;
     }
 
     // Запись в таблицу синхронизаций
@@ -290,37 +310,36 @@ class Synchronization
   }
 
   /**
-   * Events synchronization
+   * Как это должно работать
+   * Сначала мы перетаскиваем все события в локальную БД
+   * На этом этапе отфильтровываются проходы не учеников, но это не обязательно - просто немного сокращаем количество
+   *
+   * Дальнейшая обработка идет в веб таблице из-за того, что есть возможность настривать индексы так как надо
+   * TODO: [ver2] хранить дату в трех (или двух) столбцах - date, time и возможно datetime, это позволит сделать индекс на дату и быстрее выбирать то, что нужно
+   *
+   * Выбираем даты в которые происходили события и делаем цикл по датам
+   * Даты находятся в промежутке от последней до текущей синхронизации
+   * Если даты не указаны нужно как-то указывать начальные данные связанные с текущим учебным годом
+   * Дата события не является выходным (воскресение)
+   * Дата события не является праздничным днем (массив)
+   * Дата события не попадает в промежуток каникул (массив)
+   *
+   * Что является опозданием
+   * Отсечь коды событий отвечающих за поднос карты к считывателю на пункте охраны и/или администратора, т.к. это точно не опоздание
+   * Дата события = %Рассматриваемая дата%
+   * Время события BETWEEN TIME('8:30:00') AND TIME('10:30:00')
+   * Т.к. взаимодействие с этой системой будет происходить из разных ШО - необходимо брать события, которые относятся к текущему ШО (branch_id), чтобы не было двойной работы
+   * И ученик не являтся тем, кто уже как-либо взаимодействовал с турникетов в эту дату в промежутке времени от BETWEEN TIME('6:30:00') AND TIME('8:29:59')
+   *
+   * TODO: [ver2] у некоторых классов уроки могут начинаться со второго или третьего (не обязательно по расписанию) - от этого будет зависеть время опоздания и первого взаимодействия
+   *
+   * TODO: [ver2] Дать возможность классным руководителям помечать опоздание уважительным с указанием причины
+   * TODO: [ver2] Ввести признак домашнего обучения - для таких учеников опоздания не считаются
    */
   public function events()
   {
-    /**
-     * Как это должно работать
-     * Сначала мы перетаскиваем все события в локальную БД
-     * На этом этапе отфильтровываются проходы не учеников, но это не обязательно - просто немного сокращаем количество
-     *
-     * Дальнейшая обработка идет в веб таблице из-за того, что есть возможность настривать индексы так как надо
-     * TODO: [ver2] хранить дату в трех (или двух) столбцах - date, time и возможно datetime, это позволит сделать индекс на дату и быстрее выбирать то, что нужно
-     *
-     * Выбираем даты в которые происходили события и делаем цикл по датам
-     * Даты находятся в промежутке от последней до текущей синхронизации
-     * Если даты не указаны нужно как-то указывать начальные данные связанные с текущим учебным годом
-     * Дата события не является выходным (воскресение)
-     * Дата события не является праздничным днем (массив)
-     * Дата события не попадает в промежуток каникул (массив)
-     *
-     * Что является опозданием
-     * Отсечь коды событий отвечающих за поднос карты к считывателю на пункте охраны и/или администратора, т.к. это точно не опоздание
-     * Дата события = %Рассматриваемая дата%
-     * Время события BETWEEN TIME('8:30:00') AND TIME('10:30:00')
-     * Т.к. взаимодействие с этой системой будет происходить из разных ШО - необходимо брать события, которые относятся к текущему ШО (branch_id), чтобы не было двойной работы
-     * И ученик не являтся тем, кто уже как-либо взаимодействовал с турникетов в эту дату в промежутке времени от BETWEEN TIME('6:30:00') AND TIME('8:29:59')
-     *
-     * TODO: [ver2] у некоторых классов уроки могут начинаться со второго или третьего (не обязательно по расписанию) - от этого будет зависеть время опоздания и первого взаимодействия
-     *
-     * TODO: [ver2] Дать возможность классным руководителям помечать опоздание уважительным с указанием причины
-     * TODO: [ver2] Ввести признак домашнего обучения - для таких учеников опоздания не считаются
-     */
+    $script_start = microtime(true);
+    echo 'Синхронизация событий', PHP_EOL, PHP_EOL;
 
     $qb = new QueryBuilderHandler();
     $createdEventsCount = 0;
@@ -423,9 +442,25 @@ class Synchronization
       }
     }
 
+    // Информация по данному скрипту
+    $script_finish = microtime(true);
+    $script_execution_datetime = new \DateTime('@'.(int)($script_finish - $script_start));
+    $script_time = $script_execution_datetime->format("i минут s секунд");
+    $script_memory_peak = round(memory_get_peak_usage() / 1024 / 1024, 2);
+
+    // Отчет о синхронизации
+    echo 'Синхронизация событий выполнена.', PHP_EOL;
+    echo 'Количество созданных событий ', $createdEventsCount, PHP_EOL;
+    echo 'Количество опозданий ', $latecomeEventsCount, PHP_EOL, PHP_EOL;
+
+    echo 'Время выполнения синхронизации ', $script_time, PHP_EOL;
+    echo 'Пиковое потребление памяти ', $script_memory_peak, ' Мб', PHP_EOL, PHP_EOL;
+
+
     // Отправка уведомления
     if ($this->notificationEnabled) {
-      $this->notification->sendEventsSynchronizationInfo($createdEventsCount, $latecomeEventsCount);
+      $this->notification->sendEventsSynchronizationInfo($createdEventsCount, $latecomeEventsCount, $script_time, $script_memory_peak);
+      echo 'Уведомление в Slack отправлено', PHP_EOL;
     }
 
     // Запись в таблицу синхронизаций

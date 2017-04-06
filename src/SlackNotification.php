@@ -106,8 +106,10 @@ class SlackNotification
    * @param integer $updatedGroupsCount Количество обновленных групп в процессе синхронизации
    * @param integer $hiddenGroupsCount  Количество скрытых групп в процессе синхронизации
    * @param integer $errors             Количество ошибок при записи/обновлении данных в БД
+   * @param string  $script_time        Время выполнения скрипта
+   * @param integer $script_memory_peak Пиковая нагрузка на оперативную память
    */
-  public function sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount, $errors)
+  public function sendGroupsSynchronizationInfo($createdGroupsCount, $updatedGroupsCount, $hiddenGroupsCount, $errors, $script_time, $script_memory_peak)
   {
     $message = $this->slack->createMessage();
     $message
@@ -137,6 +139,16 @@ class SlackNotification
             'title' => 'Ошибок',
             'value' => $errors,
             'short' => true
+          ],
+          [
+            'title' => 'Время исполнения',
+            'value' => $script_time,
+            'short' => true
+          ],
+          [
+            'title' => 'Пиковая нагрузка',
+            'value' => $script_memory_peak.' Мб',
+            'short' => true
           ]
         ],
         'footer' => 'ISEduC API',
@@ -150,8 +162,10 @@ class SlackNotification
    * @param integer $updatedStudentsCount Количество обновленных учеников в процессе синхронизации
    * @param integer $hiddenStudentsCount  Количество скрытых учеников в процессе синхронизации
    * @param integer $errors               Количество ошибок при записи/обновлении данных в БД
+   * @param string  $script_time          Время выполнения скрипта
+   * @param integer $script_memory_peak   Пиковая нагрузка на оперативную память
    */
-  public function sendStudentsSynchronizationInfo($createdStudentsCount, $updatedStudentsCount, $hiddenStudentsCount, $errors)
+  public function sendStudentsSynchronizationInfo($createdStudentsCount, $updatedStudentsCount, $hiddenStudentsCount, $errors, $script_time, $script_memory_peak)
   {
     $message = $this->slack->createMessage();
     $message
@@ -181,6 +195,16 @@ class SlackNotification
             'title' => 'Ошибок',
             'value' => $errors,
             'short' => true
+          ],
+          [
+            'title' => 'Время исполнения',
+            'value' => $script_time,
+            'short' => true
+          ],
+          [
+            'title' => 'Пиковая нагрузка',
+            'value' => $script_memory_peak.' Мб',
+            'short' => true
           ]
         ],
         'footer' => 'ISEduC API',
@@ -192,8 +216,10 @@ class SlackNotification
   /**
    * @param integer $createdEventsCount   Количество добавленных событий в процессе синхронизации
    * @param integer $latecomeEventsCount  Количество опозданий выявленных в процессе синхронизации
+   * @param string  $script_time          Время выполнения скрипта
+   * @param integer $script_memory_peak   Пиковая нагрузка на оперативную память
    */
-  public function sendEventsSynchronizationInfo($createdEventsCount, $latecomeEventsCount)
+  public function sendEventsSynchronizationInfo($createdEventsCount, $latecomeEventsCount, $script_time, $script_memory_peak)
   {
     $message = $this->slack->createMessage();
     $message
@@ -212,6 +238,16 @@ class SlackNotification
           [
             'title' => 'Кол-во опозданий',
             'value' => $latecomeEventsCount,
+            'short' => true
+          ],
+          [
+            'title' => 'Время исполнения',
+            'value' => $script_time,
+            'short' => true
+          ],
+          [
+            'title' => 'Пиковая нагрузка',
+            'value' => $script_memory_peak.' Мб',
             'short' => true
           ]
         ],
