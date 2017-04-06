@@ -2,6 +2,11 @@ machine:
   php:
     version: 7.1.0
 
+database:
+  override:
+    - mysql -u ubuntu CREATE DATABASE ispp-ecafe-test
+    - mysql -u ubuntu CREATE DATABASE ispp-iseduc-test
+
 general:
   branches: # list of branches to build
     only:
