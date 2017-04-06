@@ -68,7 +68,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
         'host'      => '127.0.0.1',
         'username'  => 'root',
         'password'  => '',
-        'database'  => 'ispp-ecafe-test',
+        'database'  => 'ispp_ecafe_test',
       ],
     ]]);
     $this->tester->assertTrue($testConnection);
@@ -111,7 +111,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
             'host'      => '127.0.0.1',
             'username'  => 'root',
             'password'  => '',
-            'database'  => 'ispp-ecafe-test',
+            'database'  => 'ispp_ecafe_test',
           ],
         ],
         [
@@ -137,7 +137,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
           'host'      => '127.0.0.1',
           'username'  => 'root',
           'password'  => '',
-          'database'  => 'ispp-ecafe-test',
+          'database'  => 'ispp_ecafe_test',
         ],
       ],
       [
@@ -147,7 +147,7 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
           'host'      => '127.0.0.1',
           'username'  => 'root',
           'password'  => '',
-          'database'  => 'ispp-iseduc-test',
+          'database'  => 'ispp_iseduc_test',
         ],
       ]
     );

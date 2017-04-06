@@ -1,8 +1,8 @@
 --
 -- DB creation
 --
-DROP DATABASE IF EXISTS `ispp-iseduc-test`;
-CREATE DATABASE IF NOT EXISTS `ispp-iseduc-test`;
+DROP DATABASE IF EXISTS `ispp_iseduc_test`;
+CREATE DATABASE IF NOT EXISTS `ispp_iseduc_test`;
 
 --
 -- ISEduC test tables creation
@@ -11,8 +11,8 @@ CREATE DATABASE IF NOT EXISTS `ispp-iseduc-test`;
 --
 -- Структура таблицы `ispp_branch`
 --
-DROP TABLE IF EXISTS `ispp-iseduc-test`.`ispp_branch`;
-CREATE TABLE `ispp-iseduc-test`.`ispp_branch` (
+DROP TABLE IF EXISTS `ispp_iseduc_test`.`ispp_branch`;
+CREATE TABLE `ispp_iseduc_test`.`ispp_branch` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `full_name` varchar(128) NOT NULL,
   `short_name` varchar(128) NOT NULL,
@@ -35,8 +35,8 @@ CREATE TABLE `ispp-iseduc-test`.`ispp_branch` (
 --
 -- Структура таблицы `ispp_group`
 --
-DROP TABLE IF EXISTS `ispp-iseduc-test`.`ispp_group`;
-CREATE TABLE `ispp-iseduc-test`.`ispp_group` (
+DROP TABLE IF EXISTS `ispp_iseduc_test`.`ispp_group`;
+CREATE TABLE `ispp_iseduc_test`.`ispp_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `system_id` int(11) unsigned DEFAULT NULL COMMENT 'clients_groups.IdOfClientsGroup',
   `name` varchar(45) NOT NULL,
@@ -60,8 +60,8 @@ CREATE TABLE `ispp-iseduc-test`.`ispp_group` (
 --
 -- Структура таблицы `ispp_student`
 --
-DROP TABLE IF EXISTS `ispp-iseduc-test`.`ispp_student`;
-CREATE TABLE `ispp-iseduc-test`.`ispp_student` (
+DROP TABLE IF EXISTS `ispp_iseduc_test`.`ispp_student`;
+CREATE TABLE `ispp_iseduc_test`.`ispp_student` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `system_id` int(11) unsigned NOT NULL COMMENT 'clients.IdOfClient',
   `system_group_id` int(11) unsigned NOT NULL COMMENT 'clients.ClientsGroupId',
@@ -82,8 +82,8 @@ CREATE TABLE `ispp-iseduc-test`.`ispp_student` (
 --
 -- Структура таблицы `ispp_event`
 --
-DROP TABLE IF EXISTS `ispp-iseduc-test`.`ispp_event`;
-CREATE TABLE `ispp-iseduc-test`.`ispp_event` (
+DROP TABLE IF EXISTS `ispp_iseduc_test`.`ispp_event`;
+CREATE TABLE `ispp_iseduc_test`.`ispp_event` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `system_id` int(11) unsigned NOT NULL COMMENT 'enterevents.IdOfEnterEvent',
   `student_system_id` int(11) unsigned DEFAULT NULL COMMENT 'enterevents.IdOfClient',
@@ -104,8 +104,8 @@ CREATE TABLE `ispp-iseduc-test`.`ispp_event` (
 --
 -- Структура таблицы `ispp_sync`
 --
-DROP TABLE IF EXISTS `ispp-iseduc-test`.`ispp_sync`;
-CREATE TABLE `ispp-iseduc-test`.`ispp_sync` (
+DROP TABLE IF EXISTS `ispp_iseduc_test`.`ispp_sync`;
+CREATE TABLE `ispp_iseduc_test`.`ispp_sync` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `action` varchar(100) NOT NULL COMMENT 'Console command',
   `errors` int(11) NOT NULL COMMENT 'Number of errors',

@@ -15,7 +15,7 @@ extensions:
 modules:
     enabled:
         - Db:
-            dsn: 'mysql:host=127.0.0.1;dbname=ispp-iseduc-test'
+            dsn: 'mysql:host=127.0.0.1;dbname=ispp_iseduc_test'
             user: 'root'
             password: ''
             dump: 'tests/_data/web_dump.sql'

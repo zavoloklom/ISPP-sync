@@ -20,9 +20,9 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
 
     // For load test
     //for ($i=0; $i<2000; $i++) {
-    //  $this->tester->haveInDatabase('ispp-ecafe-test.clients', ['ClientsGroupId'=>1000000011, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
-    //  $this->tester->haveInDatabase('ispp-ecafe-test.clients', ['ClientsGroupId'=>1100000010, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
-    //  $this->tester->haveInDatabase('ispp-ecafe-test.clients', ['ClientsGroupId'=>1100000000, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
+    //  $this->tester->haveInDatabase('ispp_ecafe_test.clients', ['ClientsGroupId'=>1000000011, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
+    //  $this->tester->haveInDatabase('ispp_ecafe_test.clients', ['ClientsGroupId'=>1100000010, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
+    //  $this->tester->haveInDatabase('ispp_ecafe_test.clients', ['ClientsGroupId'=>1100000000, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
     //}
   }
 
@@ -46,13 +46,13 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     $sync->students();
 
     // Проверки
-    $this->tester->seeNumRecords(13, 'ispp-iseduc-test.ispp_student');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1001]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1017]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1021]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1019]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1014]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1015]);
+    $this->tester->seeNumRecords(13, 'ispp_iseduc_test.ispp_student');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1001]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1017]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1021]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1019]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1014]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1015]);
   }
 
   /**
@@ -67,7 +67,7 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
   {
     // Начальный набор
     for ($i=1; $i<=13; $i++) {
-      $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1000+$i, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
+      $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1000+$i, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
     }
 
     // Выполнение команды
@@ -75,13 +75,13 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     $sync->students();
 
     // Проверки
-    $this->tester->seeNumRecords(13, 'ispp-iseduc-test.ispp_student');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1010]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1017]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1021]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1019]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1014]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1015]);
+    $this->tester->seeNumRecords(13, 'ispp_iseduc_test.ispp_student');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1010]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1017]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1021]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1019]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1014]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1015]);
   }
 
   /**
@@ -95,22 +95,22 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
   public function testStudentsActionUpdateAndInsertDataToWebServer()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1010, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1001, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1009, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1010, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1001, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1009, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname']);
 
     // Выполнение команды
     $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
-    $this->tester->seeNumRecords(13, 'ispp-iseduc-test.ispp_student');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1010, 'system_group_id'=>1000000010]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1017]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1021]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1019]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1014]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1015]);
+    $this->tester->seeNumRecords(13, 'ispp_iseduc_test.ispp_student');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1010, 'system_group_id'=>1000000010]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1017]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1021]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1019]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1014]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1015]);
   }
 
   /**
@@ -125,21 +125,21 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
   public function testStudentsActionHideUnnecessaryDataOnWebServer()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1040, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'state'=>1]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1040, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'state'=>1]);
 
     // Выполнение команды
     $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
-    $this->tester->seeNumRecords(14, 'ispp-iseduc-test.ispp_student');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1010]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1040, 'state'=>0]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1017]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1021]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1019]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1014]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1015]);
+    $this->tester->seeNumRecords(14, 'ispp_iseduc_test.ispp_student');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1010]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1040, 'state'=>0]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1017]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1021]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1019]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1014]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1015]);
   }
 
   /**
@@ -153,23 +153,23 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
   public function testStudentsActionCheckStudentPhoto()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1004, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'photo'=>0]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1011, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'photo'=>0]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1013, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'photo'=>1]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1004, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'photo'=>0]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1011, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'photo'=>0]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1013, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'photo'=>1]);
 
     // Выполнение команды
     $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1004, 'photo'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1007, 'photo'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1008, 'photo'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1009, 'photo'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1013, 'photo'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1004, 'photo'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1007, 'photo'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1008, 'photo'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1009, 'photo'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1013, 'photo'=>1]);
 
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1001, 'photo'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1011, 'photo'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1001, 'photo'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1011, 'photo'=>0]);
   }
 
   /**
@@ -187,19 +187,19 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
     $sync->students();
 
     // Проверки
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1001, 'notify'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1002, 'notify'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1003, 'notify'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1004, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1005, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1006, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1007, 'notify'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1008, 'notify'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1009, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1010, 'notify'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1011, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1012, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1013, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1001, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1002, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1003, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1004, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1005, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1006, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1007, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1008, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1009, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1010, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1011, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1012, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1013, 'notify'=>0]);
   }
 
   /**
@@ -213,17 +213,17 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
   public function testStudentsActionCheckStudentNotificationsOnUpdate()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1001, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'notify'=>1]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1004, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'notify'=>0]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1013, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'notify'=>0]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1001, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'notify'=>1]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1004, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'notify'=>0]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1013, 'system_group_id'=>1000000007, 'name'=>'name', 'middlename'=>'middlename', 'lastname'=>'lastname', 'notify'=>0]);
 
     // Выполнение команды
     $sync = Fixtures::get('sync');
     $sync->students();
 
     // Проверки
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1001, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1004, 'notify'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_student', ['system_id'=>1013, 'notify'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1001, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1004, 'notify'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_student', ['system_id'=>1013, 'notify'=>0]);
   }
 }

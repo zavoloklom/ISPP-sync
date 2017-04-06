@@ -41,13 +41,13 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
     $sync->groups();
 
     // Проверки
-    $this->tester->seeNumRecords(10, 'ispp-iseduc-test.ispp_group');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'6-Г']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-О']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'СДС Мордашова']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'Администрация']);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'4-Е', 'branch_id'=>0]);
+    $this->tester->seeNumRecords(10, 'ispp_iseduc_test.ispp_group');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'6-Г']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'5-О']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'СДС Мордашова']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'Администрация']);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'4-Е', 'branch_id'=>0]);
   }
 
   /**
@@ -67,31 +67,31 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
   public function testGroupsActionUpdateDataToWebServer()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-З', 'system_id'=>1000000001]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '6-Г', 'system_id'=>1000000002]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '5-Л', 'system_id'=>1000000001]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '8-М', 'system_id'=>1000000001]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '5-Г', 'system_id'=>1000000001]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '5-Н', 'system_id'=>1000000001]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '7-З', 'system_id'=>1000000001]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '4-Е', 'system_id'=>1000000001, 'branch_id'=>1]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '3-В', 'system_id'=>9]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '2-З', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '6-Г', 'system_id'=>1000000002]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '5-Л', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '8-М', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '5-Г', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '5-Н', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '7-З', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '4-Е', 'system_id'=>1000000001, 'branch_id'=>1]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '3-В', 'system_id'=>9]);
 
     // Выполнение команды
     $sync = Fixtures::get('sync');
     $sync->groups();
 
     // Проверки
-    $this->tester->seeNumRecords(10, 'ispp-iseduc-test.ispp_group');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'6-Г', 'system_id'=>1000000002]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-Л', 'system_id'=>1000000005]);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'СДС Мордашова']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-О']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'Администрация']);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'4-Е', 'branch_id'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'8-М', 'branch_id'=>0]);
+    $this->tester->seeNumRecords(10, 'ispp_iseduc_test.ispp_group');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'6-Г', 'system_id'=>1000000002]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'5-Л', 'system_id'=>1000000005]);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'СДС Мордашова']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'5-О']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'Администрация']);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'4-Е', 'branch_id'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'8-М', 'branch_id'=>0]);
   }
 
   /**
@@ -111,25 +111,25 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
   public function testGroupsActionUpdateAndInsertNewGroupsToWebServer()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-З', 'system_id'=>1000000001]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '6-Г', 'system_id'=>1000000002]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '4-Е', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '2-З', 'system_id'=>1000000001]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '6-Г', 'system_id'=>1000000002]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '4-Е', 'system_id'=>1000000001]);
 
     // Выполнение команды
     $sync = Fixtures::get('sync');
     $sync->groups();
 
     // Проверки
-    $this->tester->seeNumRecords(10, 'ispp-iseduc-test.ispp_group');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'6-Г']);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'3-В']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'СДС Мордашова']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'5-О']);
-    $this->tester->dontSeeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'Администрация']);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'4-Е', 'branch_id'=>0]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'8-М', 'branch_id'=>0]);
+    $this->tester->seeNumRecords(10, 'ispp_iseduc_test.ispp_group');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'6-Г']);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'3-В']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'ДО2-Подготовительная №4']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'СДС Мордашова']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'5-О']);
+    $this->tester->dontSeeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'Администрация']);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'4-Е', 'branch_id'=>0]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'8-М', 'branch_id'=>0]);
   }
 
   /**
@@ -143,16 +143,16 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
   public function testGroupsActionHideUnnecessaryGroupOnWebServer()
   {
     // Начальный набор
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '12-Я', 'system_id'=>1000000001, 'state'=>1]);
-    $this->tester->haveInDatabase('ispp-iseduc-test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '12-Я', 'system_id'=>1000000001, 'state'=>1]);
+    $this->tester->haveInDatabase('ispp_iseduc_test.ispp_group', ['name' => '2-И', 'system_id'=>1000000003]);
 
     // Выполнение команды
     $sync = Fixtures::get('sync');
     $sync->groups();
 
     // Проверки
-    $this->tester->seeNumRecords(11, 'ispp-iseduc-test.ispp_group');
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'6-Г', 'state'=>1]);
-    $this->tester->seeInDatabase('ispp-iseduc-test.ispp_group', ['name'=>'12-Я', 'state'=>0]);
+    $this->tester->seeNumRecords(11, 'ispp_iseduc_test.ispp_group');
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'6-Г', 'state'=>1]);
+    $this->tester->seeInDatabase('ispp_iseduc_test.ispp_group', ['name'=>'12-Я', 'state'=>0]);
   }
 }

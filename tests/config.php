@@ -46,7 +46,7 @@ return (array) array(
       'host'      => '127.0.0.1',
       'username'  => 'root',
       'password'  => '',
-      'database'  => 'ispp-ecafe-test',
+      'database'  => 'ispp_ecafe_test',
     ],
   ],
   'web_server' => [
@@ -56,7 +56,7 @@ return (array) array(
       'host'      => '127.0.0.1',
       'username'  => 'root',
       'password'  => '',
-      'database'  => 'ispp-iseduc-test',
+      'database'  => 'ispp_iseduc_test',
     ],
   ],
   'slack' => false

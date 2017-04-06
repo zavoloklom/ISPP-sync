@@ -4,8 +4,8 @@ machine:
 
 database:
   override:
-    - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS `ispp-ecafe-test`"
-    - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS `ispp-iseduc-test`"
+    - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS ispp_ecafe_test"
+    - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS ispp_iseduc_test"
 
 general:
   branches: # list of branches to build
