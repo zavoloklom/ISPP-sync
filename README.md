@@ -1,39 +1,72 @@
-## Установка
-* Скачать PHP
-* Скопировать в папку PHP SSL сертификат
+# ISPP-SYNC 
+PHP скрипт синхронизации данных между удаленным сервером и сервером ИСПП.
+
+[![license](https://img.shields.io/github/license/zavoloklom/ISPP-sync.svg?style=flat-square)](https://github.com/zavoloklom/ISPP-sync/LICENSE)
+[![GitHub tag](https://img.shields.io/github/release/zavoloklom/ISPP-sync.svg?style=flat-square)](https://github.com/zavoloklom/ISPP-sync/tags)
+[![CircleCI branch](https://img.shields.io/circleci/project/github/zavoloklom/ISPP-sync.svg?style=flat-square)](https://circleci.com/gh/zavoloklom/ISPP-sync)
+[![Codecov](https://img.shields.io/codecov/c/github/zavoloklom/ISPP-sync.svg?style=flat-square)](https://codecov.io/gh/zavoloklom/ISPP-sync)
+[![Gemnasium](https://img.shields.io/gemnasium/zavoloklom/ISPP-sync.svg?style=flat-square)](https://gemnasium.com/github.com/zavoloklom/ISPP-sync)
+[![VersionEye](https://img.shields.io/versioneye/d/zavoloklom/ISPP-sync.svg?style=flat-square)](https://www.versioneye.com/user/projects/58e7a4fe26a5bb002b54c1b5?child=summary)
+
+## Установка и запуск (Windows)
+* Скачать и установить [PHP 7.1](http://php.net/downloads.php)
+* Скачать и установить [Visual C++ Redistributable for Visual Studio 2015](http://www.microsoft.com/en-us/download/details.aspx?id=48145)
+* Скопировать в папку PHP SSL сертификат `cacert.pem`
 * Включить расширения в файле `php.ini`:
-  * OpenSSL
-  * openssl.cafile= C:/PHP/cacert.pem
-  * Curl
-  * mbstring
-  * Все что касается подключений к БД
-* Создать папку на диске `C` с содержимым этого репозитория
-* Скачать в эту папку composer
-* Запустить composer install в командной строке:
-  * `cd C:\OpenServer\domains\ISPP-sync`
-  * `C:\PHP\php.exe composer.phar install`
+  ```
+    extension=php_curl.dll
+    extension=php_mbstring.dll
+    extension=php_mysqli.dll
+    extension=php_openssl.dll
+    extension=php_pdo_mysql.dll
+    extension=php_pdo_pgsql.dll
+    extension=php_pdo_sqlite.dll
+    extension=php_pgsql.dll
+  ```
+* Указать путь до `cacert.pem` в файле `php.ini`:
+  ```
+    [openssl]
+    ; The location of a Certificate Authority (CA) file on the local filesystem
+    ; to use when verifying the identity of SSL/TLS peers. Most users should
+    ; not specify a value for this directive as PHP will attempt to use the
+    ; OS-managed cert stores in its absence. If specified, this value may still
+    ; be overridden on a per-stream basis via the "cafile" SSL stream context
+    ; option.
+    openssl.cafile= C:/PHP/cacert.pem
+  ```  
+* Скачать и установить [Git](https://git-scm.com/downloads)  
+* Создать папку с содержимым этого репозитория (с помощью консоли)
+  ```
+    git clone [-b <BRANCH_NAME>] https://github.com/zavoloklom/ISPP-sync.git [FOLDER_NAME]
+  ```
+* Скачать и установить [Composer](https://getcomposer.org/download/)
+* Перейти в папку с проектом и установить зависимости  (с помощью консоли)
+  ```
+    composer install --no-dev
+  ```
 * Т.к. при большом количестве данных скрипт будет выполнятся достаточно долго нужно увеличить лимиты таймаута для БД и PHP:
   * На 6 тысячах записей в таблице clients _один тест_ проходит примерно за 45 секунд
   * На ~3 тясячах записей учеников и ~4 тысячах остальных людей в таблице clients _синхронизация_ проходит примерно 5 минут
-  * На >300 тясячах записей прохода в таблице enterevents _синхронизация_ проходит примерно 30 минут
-  * Для _mysql_ на сервере это `interactive_timeout` и `wait_timeout` можно поставить 6 часов - 21600
-  * Для _PHP_ в файле `php.ini`:   
+  * На >300 тясячах записей прохода _синхронизация_ проходит примерно 30 минут
+  * Для _mysql_ на удаленном сервере это `interactive_timeout` и `wait_timeout` можно поставить 6 часов - 21600
+  * Для _PHP_ на локальной машине в файле `php.ini`:   
   ```
     ; Maximum amount of memory a script may consume 1024M
     ; http://php.net/memory-limit
     memory_limit = 1024M
   ```
-* Скопировать тестовые настройки из папки `example` в корень созданной папки и изменить значения по умолчанию на необходимые
-* Настроить выполнение необходимых bash-скриптов через планировщик задач
+* Скопировать примеры команд и настройки из папки `example` в корень созданной папки и изменить значения по умолчанию на необходимые
+* Настроить выполнение необходимых cmd-скриптов через планировщик задач
 
 ## Тестирование
-* Нужно прописать пути в переменные окружения до PHP (желательно чтобы PHP был установлен глобально) и MySQL
-* Нужно создать в тестируемых соединениях БД `ispp_ecafe_test` и `ispp_iseduc_test`
-* Должен быть настроен доступ к mysql
+* Должны быть уставлены PHP и MySql сервер
+* Нужно прописать пути в переменные окружения до PHP и MySQL
+* Нужно создать базы данных `ispp_ecafe_test` и `ispp_iseduc_test`
 
 ## Что тестируется
 ### Тестирование синхронизации групп
 Ничего интересного
+
 ### Тестирование синхронизации учеников
 
 _Пояснение к начальному набору данных_
@@ -57,7 +90,7 @@ _Пояснение к начальному набору данных_
 | 14 | ученик     | Нет      | Да:28    | Нет  | Нет     | Нет   | --   | --    | Группа 'Выбывшие'                                    |
 | 15 | ученик     | Нет      | Нет      | Нет  | Нет     | Нет   | --   | --    | Группа 'Несуществующий класс'                        |
 | 16 | сотрудник  | Нет      | Нет      | Нет  | Да      | Нет   | --   | --    | Группа 'Удаленные'                                   |
-| 17 | учитель    | Да       | Да:11    | Нет  | Нет     | Нет   | --   | --    |                                                      |  | 
+| 17 | учитель    | Да       | Да:11    | Нет  | Нет     | Нет   | --   | --    |                                                      | 
 | 18 | учитель    | Нет      | Нет      | Нет  | Да      | Нет   | --   | --    |                                                      |
 | 19 | дошкольник | Нет      | Да:20    | Нет  | Нет     | Нет   | --   | --    |                                                      |
 | 20 | родитель   | Нет      | Да:19    | Нет  | Нет     | Нет   | --   | --    |                                                      |
