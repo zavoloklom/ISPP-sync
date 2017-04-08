@@ -24,3 +24,13 @@ comment:
   layout: "header, diff"
   behavior: default
   require_changes: no
+
+notify:
+    slack:
+      default:
+        url: "https://hooks.slack.com/services/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"
+        threshold: 1%
+		only_pulls: false
+        branches: null
+        flags: null
+		paths: null
