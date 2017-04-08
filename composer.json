@@ -1,8 +1,11 @@
 {
   "name": "zavoloklom/ispp-sync",
-  "description": "ISPP synchronization script",
-  "minimum-stability": "dev",
-  "license": "MIT",
+  "description": "ISPP synchronization console script",
+  "homepage": "https://github.com/zavoloklom/ispp-sync/",
+  "keywords": ["ispp", "php", "console"],
+  "license": "GPL-3.0",
+  "type": "project",
+  "minimum-stability": "stable",
   "authors": [
     {
       "name": "Sergey Kupletsky",
@@ -11,7 +14,6 @@
   ],
   "support": {
     "issues": "https://github.com/zavoloklom/ispp-sync/issues?state=open",
-    "wiki": "https://github.com/zavoloklom/ispp-sync/wiki",
     "source": "https://github.com/zavoloklom/ispp-sync"
   },
   "autoload": {
@@ -23,7 +25,11 @@
     "post-install-cmd": "php app.php help"
   },
   "require": {
-    "php": ">=5.6.0",
+    "php": "^7.0",
+    "ext-curl": "*",
+    "ext-mbstring": "*",
+    "ext-mysqli": "*",
+    "ext-pdo_mysql": "*",
     "usmanhalalit/pixie": "2.*@dev",
     "maknz/slack": "1.*@dev"
   },
