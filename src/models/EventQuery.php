@@ -16,18 +16,18 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  */
 class EventQuery extends QueryBuilderHandler
 {
-  public function doneByStudents()
-  {
-    return $this
-      ->leftJoin(Client::tableName(), Event::tableName().'.IdOfClient', '=', Client::tableName().'.IdOfClient')
-      ->leftJoin(ClientsGroup::tableName(), Client::tableName().'.ClientsGroupId', '=', ClientsGroup::tableName().'.IdOfClientsGroup')
-      ->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
-  }
+    public function doneByStudents()
+    {
+        return $this
+            ->leftJoin(Client::tableName(), Event::tableName().'.IdOfClient', '=', Client::tableName().'.IdOfClient')
+            ->leftJoin(ClientsGroup::tableName(), Client::tableName().'.ClientsGroupId', '=', ClientsGroup::tableName().'.IdOfClientsGroup')
+            ->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
+    }
 
-  public function turnstileEvents()
-  {
-    return $this->whereIn(Event::tableName().'.PassDirection', [Event::DIRECTION_PassEnter, Event::DIRECTION_PassExit, Event::DIRECTION_TwicePassEnter, Event::DIRECTION_TwicePassExit]);
-  }
+    public function turnstileEvents()
+    {
+        return $this->whereIn(Event::tableName().'.PassDirection', [Event::DIRECTION_PassEnter, Event::DIRECTION_PassExit, Event::DIRECTION_TwicePassEnter, Event::DIRECTION_TwicePassExit]);
+    }
 
 
 }

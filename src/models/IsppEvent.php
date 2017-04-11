@@ -17,25 +17,25 @@ use Pixie\Connection;
 class IsppEvent extends ActiveRecord
 {
 
-  const TYPE_EVENT      = 0;
-  const TYPE_LATECOME   = 1;
+    const TYPE_EVENT      = 0;
+    const TYPE_LATECOME   = 1;
 
-  /**
-   * @inheritdoc
-   */
-  public static function getConnection()
-  {
-    return new Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
-  }
+    /**
+     * @inheritdoc
+     */
+    public static function getConnection()
+    {
+        return new Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
+    }
 
-  /**
-   * @inheritdoc
-   * @return IsppEventQuery
-   */
-  public static function qb()
-  {
-    $qb = new IsppEventQuery(self::getConnection());
-    return $qb->table(self::tableName());
-  }
+    /**
+     * @inheritdoc
+     * @return IsppEventQuery
+     */
+    public static function qb()
+    {
+        $qb = new IsppEventQuery(self::getConnection());
+        return $qb->table(self::tableName());
+    }
 
 }

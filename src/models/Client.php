@@ -17,29 +17,29 @@ use Pixie\Connection;
 class Client extends ActiveRecord
 {
 
-  /**
-   * @inheritdoc
-   */
-  public static function getConnection()
-  {
-    return new Connection(CONFIG['local_server']['adapter'], CONFIG['local_server']['options']);
-  }
+    /**
+     * @inheritdoc
+     */
+    public static function getConnection()
+    {
+        return new Connection(CONFIG['local_server']['adapter'], CONFIG['local_server']['options']);
+    }
 
-  /**
-   * @inheritdoc
-   */
-  public static function tableName()
-  {
-    return 'clients';
-  }
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'clients';
+    }
 
-  /**
-   * @inheritdoc
-   * @return ClientQuery
-   */
-  public static function qb()
-  {
-    $qb = new ClientQuery(self::getConnection());
-    return $qb->table(self::tableName());
-  }
+    /**
+     * @inheritdoc
+     * @return ClientQuery
+     */
+    public static function qb()
+    {
+        $qb = new ClientQuery(self::getConnection());
+        return $qb->table(self::tableName());
+    }
 }

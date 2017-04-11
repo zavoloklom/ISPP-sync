@@ -16,14 +16,14 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  */
 class IsppGroupQuery extends QueryBuilderHandler
 {
-  public function active()
-  {
-    return $this->where(IsppGroup::tableName().'.state', '=', IsppGroup::STATE_ACTIVE);
-  }
+    public function active()
+    {
+        return $this->where(IsppGroup::tableName().'.state', '=', IsppGroup::STATE_ACTIVE);
+    }
 
-  public function inactive()
-  {
-    return $this->where(IsppGroup::tableName().'.state', '=', IsppGroup::STATE_INACTIVE);
-  }
+    public function inactive()
+    {
+        return $this->where(IsppGroup::tableName().'.state', '=', IsppGroup::STATE_INACTIVE);
+    }
 
 }

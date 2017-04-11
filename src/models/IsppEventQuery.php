@@ -16,9 +16,9 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  */
 class IsppEventQuery extends QueryBuilderHandler
 {
-  public function latecomes()
-  {
-    return $this->where(IsppEvent::tableName().'.state', '=', IsppEvent::STATE_LATECOME);
-  }
+    public function latecomes()
+    {
+        return $this->where(IsppEvent::tableName().'.state', '=', IsppEvent::STATE_LATECOME);
+    }
 
 }

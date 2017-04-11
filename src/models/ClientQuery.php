@@ -16,14 +16,14 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  */
 class ClientQuery extends QueryBuilderHandler
 {
-  public function schoolClasses()
-  {
-    return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
-  }
+    public function schoolClasses()
+    {
+        return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
+    }
 
-  public function kindergartens()
-  {
-    return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_KINDERGARTEN);
-  }
+    public function kindergartens()
+    {
+        return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_KINDERGARTEN);
+    }
 
 }

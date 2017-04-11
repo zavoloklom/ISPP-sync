@@ -16,14 +16,14 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  */
 class IsppStudentQuery extends QueryBuilderHandler
 {
-  public function active()
-  {
-    return $this->where(IsppStudent::tableName().'.state', '=', IsppStudent::STATE_ACTIVE);
-  }
+    public function active()
+    {
+        return $this->where(IsppStudent::tableName().'.state', '=', IsppStudent::STATE_ACTIVE);
+    }
 
-  public function inactive()
-  {
-    return $this->where(IsppStudent::tableName().'.state', '=', IsppStudent::STATE_INACTIVE);
-  }
+    public function inactive()
+    {
+        return $this->where(IsppStudent::tableName().'.state', '=', IsppStudent::STATE_INACTIVE);
+    }
 
 }

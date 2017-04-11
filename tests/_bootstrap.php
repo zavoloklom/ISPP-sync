@@ -13,14 +13,14 @@ $sync->department_id = array_key_exists('department', CONFIG) ? CONFIG['departme
 $sync->education = array_key_exists('education', CONFIG) ? new Education(CONFIG['education']) : NULL;
 // Setup notification system
 if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new SlackNotification(CONFIG['slack'], CONFIG)) {
-  $sync->notification = $notification;
-  $sync->notificationEnabled = true;
+    $sync->notification = $notification;
+    $sync->notificationEnabled = true;
 }
 \Codeception\Util\Fixtures::add('sync', $sync);
 
 // Применить ecafe_dump
 if (CONFIG['local_server']['adapter'] == 'mysql') {
-  $dumpConfig = CONFIG['local_server']['options'];
-  $password = $dumpConfig['password'] ? '-p '.$dumpConfig['password'] : '';
-  exec('mysql -h '.$dumpConfig['host'].' -u '.$dumpConfig['username'].' '.$password.' < '.__DIR__.'/_data/ecafe_dump.sql');
+    $dumpConfig = CONFIG['local_server']['options'];
+    $password = $dumpConfig['password'] ? '-p '.$dumpConfig['password'] : '';
+    exec('mysql -h '.$dumpConfig['host'].' -u '.$dumpConfig['username'].' '.$password.' < '.__DIR__.'/_data/ecafe_dump.sql');
 }
