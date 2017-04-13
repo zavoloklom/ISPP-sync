@@ -1,0 +1,28 @@
+actor: Tester
+paths:
+    tests: tests
+    log: tests/_output
+    data: tests/_data
+    support: tests/_support
+    envs: tests/_envs
+settings:
+    bootstrap: _bootstrap.php
+    colors: false
+    memory_limit: 1024M
+coverage:
+    enabled: true
+    include:
+        - src/*
+extensions:
+    enabled:
+        - Codeception\Extension\RunFailed
+modules:
+    enabled:
+        - Db:
+            dsn: 'mysql:host=127.0.0.1;dbname=ispp_iseduc_test'
+            user: 'root'
+            password: ''
+            dump: 'tests/_data/web_dump.sql'
+            populate: true
+            cleanup: true
+            reconnect: true

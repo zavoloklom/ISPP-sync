@@ -1,0 +1,41 @@
+{
+  "name": "zavoloklom/ispp-sync",
+  "description": "ISPP synchronization console script",
+  "homepage": "https://github.com/zavoloklom/ispp-sync/",
+  "keywords": ["ispp", "php", "console"],
+  "license": "GPL-3.0",
+  "type": "project",
+  "minimum-stability": "stable",
+  "authors": [
+    {
+      "name": "Sergey Kupletsky",
+      "email": "kupletsky_sa@1534.org"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/zavoloklom/ispp-sync/issues?state=open",
+    "source": "https://github.com/zavoloklom/ispp-sync"
+  },
+  "autoload": {
+    "psr-4": {
+      "zavoloklom\\ispp\\sync\\": ""
+    }
+  },
+  "scripts": {
+    "post-install-cmd": "php app.php help"
+  },
+  "require": {
+    "php": "^7.0",
+    "ext-curl": "*",
+    "ext-mbstring": "*",
+    "ext-mysqli": "*",
+    "ext-pdo_mysql": "*",
+    "usmanhalalit/pixie": "2.*@dev",
+    "maknz/slack": "1.*@dev"
+  },
+  "require-dev": {
+    "codeception/codeception": "^2.2.0",
+    "phpunit/phpunit": "5.*@dev",
+    "codacy/coverage": "dev-master"
+  }
+}

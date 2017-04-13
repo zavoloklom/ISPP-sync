@@ -1,0 +1,29 @@
+machine:
+  php:
+    version: 7.1.0
+
+database:
+  override:
+    - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS ispp_ecafe_test"
+    - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS ispp_iseduc_test"
+
+dependencies:
+  pre:
+    - curl -s http://getcomposer.org/installer | php
+    - php composer.phar install -n
+
+general:
+  branches: # list of branches to build
+    only:
+      - master
+      - 1.x
+      - 2.x
+      - /release-.*/
+
+test:
+  override:
+    - vendor/bin/codecept run --coverage-xml=coverage.xml
+  post:
+    - bash <(curl -s https://codecov.io/bash) -t 136e079e-d1e7-4472-baf0-49d6f8e7c10e
+    - php vendor/bin/codacycoverage clover tests/_output/coverage.xml
+    - curl -X POST -H "Accept:application/vnd.com.sensiolabs.insight+xml" "https://3c376b1f-4f5d-4efe-9be2-42a6394e19ee:55e1a2cd26def5c6bff30465895a1104fee1530812ea05014f55654c8212bebd@insight.sensiolabs.com/api/projects/a25e42e6-57d3-482a-aaac-8adf13127259/analyses"
