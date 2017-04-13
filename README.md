@@ -8,7 +8,11 @@ PHP скрипт синхронизации данных между удален
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/a25e42e6-57d3-482a-aaac-8adf13127259/mini.png)](https://insight.sensiolabs.com/projects/a25e42e6-57d3-482a-aaac-8adf13127259)
 [![Codacy grade](https://img.shields.io/codacy/grade/d796fadd2074487082df2218efb5b083.svg?style=flat-square)](https://api.codacy.com/project/badge/Grade/d796fadd2074487082df2218efb5b083)
 [![Codecov](https://img.shields.io/codecov/c/github/zavoloklom/ISPP-sync.svg?style=flat-square)](https://codecov.io/gh/zavoloklom/ISPP-sync)
-[![VersionEye](https://img.shields.io/versioneye/d/zavoloklom/ISPP-sync.svg?style=flat-square)](https://www.versioneye.com/user/projects/58e7a4fe26a5bb002b54c1b5?child=summary)
+
+[![Dependency CI Status](https://dependencyci.com/github/zavoloklom/ISPP-sync/badge?style=flat-square)](https://dependencyci.com/github/zavoloklom/ISPP-sync)
+[![VersionEye Mater Branch Dependency Status](https://www.versioneye.com/user/projects/58eff02b0f9f350049e36ff5/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/58eff02b0f9f350049e36ff5)
+[![Gemnasium Dependency Status](https://img.shields.io/gemnasium/zavoloklom/ISPP-sync.svg?style=flat-square)](https://gemnasium.com/github.com/zavoloklom/ISPP-sync)
+
 
 ## Установка и запуск (Windows)
 * Скачать и установить [PHP 7.1](http://php.net/downloads.php)
