@@ -30,7 +30,7 @@ notify:
       default:
         url: "https://hooks.slack.com/services/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"
         threshold: 1%
-		only_pulls: false
+        only_pulls: false
         branches:
           - "master"
           - "1.x"
