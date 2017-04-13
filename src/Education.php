@@ -103,7 +103,7 @@ class Education
         foreach ($this->vacationIntervals as $vacationInterval) {
             $vacationStart = date('Y-m-d', strtotime($vacationInterval[0]));
             $vacationFinish = date('Y-m-d', strtotime($vacationInterval[1]));
-            if ($vacationStart <= $checkDate and $checkDate <= $vacationFinish) {
+            if ($vacationStart <= $checkDate && $checkDate <= $vacationFinish) {
                 return true;
             }
         }
