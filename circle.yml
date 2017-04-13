@@ -7,6 +7,11 @@ database:
     - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS ispp_ecafe_test"
     - mysql -u ubuntu -e "CREATE DATABASE IF NOT EXISTS ispp_iseduc_test"
 
+dependencies:
+  pre:
+    - curl -s http://getcomposer.org/installer | php
+    - php composer.phar install -n
+
 general:
   branches: # list of branches to build
     only:
@@ -20,4 +25,5 @@ test:
     - vendor/bin/codecept run --coverage-xml=coverage.xml
   post:
     - bash <(curl -s https://codecov.io/bash) -t 136e079e-d1e7-4472-baf0-49d6f8e7c10e
+    - php vendor/bin/codacycoverage phpunit tests/_output/
 

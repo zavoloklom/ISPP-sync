@@ -35,6 +35,7 @@
   },
   "require-dev": {
     "codeception/codeception": "^2.2.0",
-    "phpunit/phpunit": "5.*@dev"
+    "phpunit/phpunit": "5.*@dev",
+    "codacy/coverage": "dev-master"
   }
 }
