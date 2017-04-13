@@ -1,5 +1,5 @@
-# ISPP-SYNC
-PHP скрипт синхронизации данных между удаленным сервером и сервером ИСПП.
+# ISPP-SYNC 1.0.0
+PHP скрипт синхронизации данных между удаленным сервером и сервером ПП.
 
 [![license](https://img.shields.io/github/license/zavoloklom/ISPP-sync.svg?style=flat-square)](https://github.com/zavoloklom/ISPP-sync/LICENSE)
 [![GitHub tag](https://img.shields.io/github/release/zavoloklom/ISPP-sync.svg?style=flat-square)](https://github.com/zavoloklom/ISPP-sync/tags)
