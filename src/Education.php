@@ -15,16 +15,16 @@ namespace zavoloklom\ispp\sync\src;
 class Education
 {
     /** @var string Начало учебного года */
-    private $year_start;
+    protected $year_start;
 
     /** @var string Окончание учебного года */
-    private $year_finish;
+    protected $year_finish;
 
     /** @var bool Является ли суббота выходным днем */
-    private $isSaturdayAreHoliday;
+    protected $isSaturdayAreHoliday;
 
     /** @var bool Является ли воскресенье выходным днем */
-    private $isSundayAreHoliday;
+    protected $isSundayAreHoliday;
 
     /**
      * Даты праздников
@@ -37,7 +37,7 @@ class Education
      *
      * @var array
      */
-    private $holidays;
+    protected $holidays;
 
     /**
      * Интервалы каникул
@@ -50,10 +50,10 @@ class Education
      *
      * @var array
      */
-    private $vacationIntervals;
+    protected $vacationIntervals;
 
     /** @var integer Идентификатор отделения для записи в таблицу синхронизаций */
-    private $department_id;
+    protected $department_id;
 
     /**
      * Education constructor.
@@ -71,7 +71,7 @@ class Education
         $this->holidays             = array_key_exists('holidays', $config) ? $config['holidays'] : [];
         $this->vacationIntervals    = array_key_exists('vacationIntervals', $config) ? $config['vacationIntervals'] : [];
 
-        $this->id = array_key_exists('department_id', $config) ? $config['department_id'] : 0;
+        $this->department_id = array_key_exists('department_id', $config) ? $config['department_id'] : 0;
     }
 
     /**
@@ -124,5 +124,45 @@ class Education
     public function getYearFinish(): string
     {
         return $this->year_finish;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHolidays(): array
+    {
+        return $this->holidays;
+    }
+
+    /**
+     * @return array
+     */
+    public function getVacationIntervals(): array
+    {
+        return $this->vacationIntervals;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsSaturdayAreHoliday(): bool
+    {
+        return $this->isSaturdayAreHoliday;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getIsSundayAreHoliday(): bool
+    {
+        return $this->isSundayAreHoliday;
+    }
+
+    /**
+     * @return int
+     */
+    public function getDepartmentId(): int
+    {
+        return $this->department_id;
     }
 }
