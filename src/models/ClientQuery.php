@@ -25,5 +25,4 @@ class ClientQuery extends QueryBuilderHandler
     {
         return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_KINDERGARTEN);
     }
-
 }
