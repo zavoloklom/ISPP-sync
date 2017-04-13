@@ -25,5 +25,5 @@ test:
     - vendor/bin/codecept run --coverage-xml=coverage.xml
   post:
     - bash <(curl -s https://codecov.io/bash) -t 136e079e-d1e7-4472-baf0-49d6f8e7c10e
-    - php vendor/bin/codacycoverage phpunit tests/_output/
+    - php vendor/bin/codacycoverage phpunit tests/_output/coverage.xml
 
