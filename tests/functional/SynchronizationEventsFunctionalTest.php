@@ -1,6 +1,5 @@
 <?php
 
-use zavoloklom\ispp\sync\src\Synchronization;
 use Codeception\Util\Fixtures;
 
 /**

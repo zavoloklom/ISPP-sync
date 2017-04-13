@@ -12,7 +12,6 @@ class SynchronizationGroupsFunctionalTest extends \Codeception\Test\Unit
 
     protected function _before()
     {
-        // Очистить таблицы
         $connection = new \Pixie\Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
         $qb = new \Pixie\QueryBuilder\QueryBuilderHandler($connection);
         $qb->query("TRUNCATE ispp_group");

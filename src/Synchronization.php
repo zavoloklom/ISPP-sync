@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -140,7 +140,7 @@ class Synchronization
                             'state'     => IsppGroup::STATE_ACTIVE
                         ]);
                     $updatedGroupsCount++;
-                    //echo '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Информация обновлена';
+                    // В расширенный лог можно записать '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Информация обновлена';
                 } else {
                     $webGroupsModel::qb()
                         ->insert([
@@ -152,7 +152,7 @@ class Synchronization
                         ]);
                     $createdGroupsCount++;
                 }
-                //echo '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Информация добавлена';
+                // В расширенный лог можно записать '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Информация добавлена';
             } catch (\Exception $e) {
                 echo '['.date('Y-m-d H:i:s').'] ID '.$localGroup->IdOfClientsGroup.' - Ошибка подключения к БД', PHP_EOL;
                 $errors++;
@@ -198,10 +198,6 @@ class Synchronization
     {
         $script_start = microtime(true);
         echo 'Синхронизация идентификаторов учеников', PHP_EOL, PHP_EOL;
-
-        // Нужно продумать как без особых усилий можно было бы обновлять статус ученика
-        // $lastUpdate = $this->serverDb->createCommand("SELECT MAX(datetime) FROM ispp_sync WHERE action='update-students'")->queryScalar();
-        // $lastUpdate = $lastUpdate ? $lastUpdate : date("Y-m-d H:i:s");
 
         // Инициализация моделей
         $localModel = new Client();
@@ -251,11 +247,11 @@ class Synchronization
                             'middlename'      => $localStudent->SecondName,
                             'lastname'        => $localStudent->Surname,
                             'photo'           => $webStudent->photo || ($localStudent->internal_img != NULL || $localStudent->external_img != NULL),
-                            'notify'          => $webStudent->notify || $this->checkStudentNotifications($localStudent->IdOfClient, ($localStudent->mobile ? 1 : 0)),
+                            'notify'          => $webStudent->notify || $this->checkStudentNotifications($localStudent->IdOfClient, !empty($localStudent->mobile)),
                             'state'           => IsppStudent::STATE_ACTIVE
                         ]);
                     $updatedDataCount++;
-                    //echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Информация обновлена';
+                    // В расширенный лог можно записать '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Информация обновлена';
                 } else {
                     $webModel::qb()
                         ->insert([
@@ -265,11 +261,11 @@ class Synchronization
                             'middlename'      => $localStudent->SecondName,
                             'lastname'        => $localStudent->Surname,
                             'photo'           => ($localStudent->internal_img != NULL || $localStudent->external_img != NULL),
-                            'notify'          => $this->checkStudentNotifications($localStudent->IdOfClient, ($localStudent->mobile ? 1 : 0)),
+                            'notify'          => $this->checkStudentNotifications($localStudent->IdOfClient, !empty($localStudent->mobile)),
                             'state'           => IsppStudent::STATE_ACTIVE
                         ]);
                     $createdDataCount++;
-                    //echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Информация добавлена';
+                    // В расширенный лог можно записать '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Информация добавлена';
                 }
             } catch (\Exception $e) {
                 echo '['.date('Y-m-d H:i:s').'] ID '.$localStudent->ClientsGroupId.' - Ошибка подключения к БД', PHP_EOL;
@@ -450,7 +446,6 @@ class Synchronization
         echo 'Время выполнения синхронизации ', $script_time, PHP_EOL;
         echo 'Пиковое потребление памяти ', $script_memory_peak, ' Мб', PHP_EOL, PHP_EOL;
 
-
         // Отправка уведомления
         if ($this->notificationEnabled) {
             $this->notification->sendEventsSynchronizationInfo($createdEventsCount, $latecomeEventsCount, $script_time, $script_memory_peak);
@@ -459,7 +454,6 @@ class Synchronization
 
         // Запись в таблицу синхронизаций
         $this->logSynchronizationInfo('update-events', $this->department_id, 0, $newUpdateDatetime);
-
     }
 
     /**
@@ -484,18 +478,22 @@ class Synchronization
         return 0;
     }
 
-
     /**
+     *
+     *
      * @param $student_system_id
-     * @param bool $studentHasMobile
+     * @param bool|NULL $studentHasMobile Есть ли у ученика внесенный номер мобильного телефона
      * @return bool
      */
-    private function checkStudentNotifications($student_system_id, $studentHasMobile = false)
+    private function checkStudentNotifications($student_system_id, $studentHasMobile = NULL)
     {
         $result = $studentHasMobile;
 
-        //$notify = Client::qb()->find($student_system_id, 'IdOfClient');
-        //if ($notify && $notify->mobile) {$result = true;}
+        if ($result === NULL) {
+            $result = false;
+            $notify = Client::qb()->find($student_system_id, 'IdOfClient');
+            if ($notify && $notify->mobile) {$result = true;}
+        }
 
         $parentsQuery = Client::qb()
             ->select([
@@ -515,21 +513,21 @@ class Synchronization
         if ($parentsQuery->count() > 0) {
             $parents = $parentsQuery->get();
             foreach ($parents as $parent) {
-                $parent_connection = 1;
+                $parent_connection = true;
                 if (!$parent->mobile) {
-                    $parent_connection = 0;
+                    $parent_connection = false;
                     echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' без контактов', PHP_EOL;
                 }
                 if ($parent->connection_state == 1) {
-                    $parent_connection = 0;
+                    $parent_connection = false;
                     echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная удаленной', PHP_EOL;
                 }
                 if ($parent->connection_disabled == 1) {
-                    $parent_connection = 0;
+                    $parent_connection = false;
                     echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' помеченная устаревшей', PHP_EOL;
                 }
                 if ($parent->group_system_id == 1100000060 || $parent->group_system_id == 1100000070 || $parent->group_system_id == 1100000080) {
-                    $parent_connection = 0;
+                    $parent_connection = false;
                     echo '['.date('Y-m-d H:i:s').'] ID '.$student_system_id.' - Имеется связь с родителем '.$parent->id.' из группы выбывшие/удаленные/перемещенные', PHP_EOL;
                 }
                 $result = $result || $parent_connection;
@@ -537,7 +535,6 @@ class Synchronization
         }
         return $result;
     }
-
 
     /**
      * @param $action
@@ -572,6 +569,4 @@ class Synchronization
             self::ACTION_EVENTS
         ];
     }
-
 }
-

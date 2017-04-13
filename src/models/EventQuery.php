@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -26,8 +26,6 @@ class EventQuery extends QueryBuilderHandler
 
     public function turnstileEvents()
     {
-        return $this->whereIn(Event::tableName().'.PassDirection', [Event::DIRECTION_PassEnter, Event::DIRECTION_PassExit, Event::DIRECTION_TwicePassEnter, Event::DIRECTION_TwicePassExit]);
+        return $this->whereIn(Event::tableName().'.PassDirection', [Event::DIRECTION_PASS_ENTER, Event::DIRECTION_PASS_EXIT, Event::DIRECTION_TWICE_PASS_ENTER, Event::DIRECTION_TWICE_PASS_EXIT]);
     }
-
-
 }

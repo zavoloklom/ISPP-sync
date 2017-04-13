@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -125,5 +125,4 @@ class Education
     {
         return $this->year_finish;
     }
-
 }

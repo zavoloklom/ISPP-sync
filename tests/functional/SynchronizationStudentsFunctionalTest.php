@@ -1,6 +1,5 @@
 <?php
 
-use zavoloklom\ispp\sync\src\Synchronization;
 use Codeception\Util\Fixtures;
 
 /**
@@ -13,17 +12,9 @@ class SynchronizationStudentsFunctionalTest extends \Codeception\Test\Unit
 
     protected function _before()
     {
-        // Очистить таблицы
         $connection = new \Pixie\Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
         $qb = new \Pixie\QueryBuilder\QueryBuilderHandler($connection);
         $qb->query("TRUNCATE ispp_student");
-
-        // For load test
-        //for ($i=0; $i<2000; $i++) {
-        //  $this->tester->haveInDatabase('ispp_ecafe_test.clients', ['ClientsGroupId'=>1000000011, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
-        //  $this->tester->haveInDatabase('ispp_ecafe_test.clients', ['ClientsGroupId'=>1100000010, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
-        //  $this->tester->haveInDatabase('ispp_ecafe_test.clients', ['ClientsGroupId'=>1100000000, 'Name'=>'name', 'SecondName'=>'middlename', 'Surname'=>'lastname']);
-        //}
     }
 
     protected function _after()

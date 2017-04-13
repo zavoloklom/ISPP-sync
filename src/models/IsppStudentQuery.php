@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -25,5 +25,4 @@ class IsppStudentQuery extends QueryBuilderHandler
     {
         return $this->where(IsppStudent::tableName().'.state', '=', IsppStudent::STATE_INACTIVE);
     }
-
 }

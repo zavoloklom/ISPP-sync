@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -37,7 +37,6 @@ class Helper
         echo 'groups      Синхронизация групп пользователей', PHP_EOL;
         echo 'students    Синхронизация обучающихся в данном отделении', PHP_EOL;
         echo 'events      Синхронизация событий в данном отделении', PHP_EOL;
-        //echo 'all         Последовательная синхронизация групп, обучающихся и событий в данном отделении', PHP_EOL;
         echo PHP_EOL;
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
-use Codeception\Util\ReflectionHelper;
 use zavoloklom\ispp\sync\src\Synchronization;
 use zavoloklom\ispp\sync\src\SlackNotification;
 
@@ -76,5 +75,4 @@ class ApplicationUnitTest extends \Codeception\Test\Unit
         $sync = $this->getSyncClassWithNotifications(['slack' => ['webhook' => '127.0.0.1']]);
         $this->tester->assertTrue($sync->notificationEnabled);
     }
-
 }

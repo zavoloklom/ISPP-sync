@@ -56,5 +56,4 @@ class NotificationUnitTest extends \Codeception\Test\Unit
     {
         $this->tester->assertInstanceOf('zavoloklom\ispp\sync\src\SlackNotification', new SlackNotification(['webhook' => '127.0.0.1']));
     }
-
 }

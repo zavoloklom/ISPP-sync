@@ -164,6 +164,4 @@ class SynchronizationUnitTest extends \Codeception\Test\Unit
         $testConnections = $sync->testConnections(CONFIG['local_server'], CONFIG['web_server']);
         $this->tester->assertTrue($testConnections);
     }
-
-
 }

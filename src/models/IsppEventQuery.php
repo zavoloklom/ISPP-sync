@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -20,5 +20,4 @@ class IsppEventQuery extends QueryBuilderHandler
     {
         return $this->where(IsppEvent::tableName().'.state', '=', IsppEvent::STATE_LATECOME);
     }
-
 }

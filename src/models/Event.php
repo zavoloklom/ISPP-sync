@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -18,17 +18,17 @@ class Event extends ActiveRecord
 {
 
     // Направления турникетов (PassDirection)
-    const DIRECTION_DetectedInside    = 100;  // Поднос карты внутри здания
-    const DIRECTION_NotFixedEvent     = 4;    // Проход не фиксируется
-    const DIRECTION_PassEnter         = 0;    // Проход через турникет
-    const DIRECTION_PassExit          = 1;    // Выход через турникет
-    const DIRECTION_PassForbiden      = 2;    // Проход через турникет запрещен
-    const DIRECTION_QueryForEnter     = 8;    //
-    const DIRECTION_QueryForExit      = 9;    //
-    const DIRECTION_TurnstileBreaking = 3;    // Произошел взлом турникета
-    const DIRECTION_TurnstileRefusal  = 5;    // Отказ турникета
-    const DIRECTION_TwicePassEnter    = 6;    // Повторный проход через турникет
-    const DIRECTION_TwicePassExit     = 7;    // Повторный выход через турникет
+    const DIRECTION_DETECTED_INSIDE     = 100;  // Поднос карты внутри здания
+    const DIRECTION_NOT_FIXED_EVENT     = 4;    // Проход не фиксируется
+    const DIRECTION_PASS_ENTER          = 0;    // Проход через турникет
+    const DIRECTION_PASS_EXIT           = 1;    // Выход через турникет
+    const DIRECTION_PASS_FORBIDDEN      = 2;    // Проход через турникет запрещен
+    const DIRECTION_QUERY_FOR_ENTER     = 8;    //
+    const DIRECTION_QUERY_FOR_EXIT      = 9;    //
+    const DIRECTION_TURNSTILE_BREAKING  = 3;    // Произошел взлом турникета
+    const DIRECTION_TURNSTILE_REFUSAL   = 5;    // Отказ турникета
+    const DIRECTION_TWICE_PASS_ENTER    = 6;    // Повторный проход через турникет
+    const DIRECTION_TWICE_PASS_EXIT     = 7;    // Повторный выход через турникет
 
     // Код события (EventCode)
     const EVT_CARD_PRESENTATION = 5;

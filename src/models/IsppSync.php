@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -35,5 +35,4 @@ class IsppSync extends ActiveRecord
         $qb = new QueryBuilderHandler(self::getConnection());
         return $qb->table(self::tableName());
     }
-
 }

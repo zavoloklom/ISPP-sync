@@ -1,13 +1,12 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
 namespace zavoloklom\ispp\sync\src;
 
-use GuzzleHttp\Exception\ConnectException;
 use Maknz\Slack\Client;
 
 /**
@@ -40,18 +39,10 @@ class SlackNotification
      */
     public function __construct(array $config, array $options = [])
     {
-        // Инициализация Slack клиента
+        // Initialize Slack client
         if (array_key_exists('webhook', $config)) {
             $webhook = $config['webhook'];
             $this->slack = new Client($webhook, $options);
-
-            // Проверка корректности URI
-            //$guzzle = new \GuzzleHttp\Client();
-            //try {
-            //  $guzzle->head($webhook);
-            //} catch(ConnectException $e) {
-            //  throw new \Exception('Не удалось установить соединение со Slack сервисом.', $e->getCode(), $e);
-            //}
         } else {
             throw new \Exception('Не установлено значение для webhook.');
         }
