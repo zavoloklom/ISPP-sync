@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -15,14 +15,13 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
  */
 class ClientsGroupQuery extends QueryBuilderHandler
 {
-  public function schoolClasses()
-  {
-    return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
-  }
+    public function schoolClasses()
+    {
+        return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_CLASS);
+    }
 
-  public function kindergartens()
-  {
-    return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_KINDERGARTEN);
-  }
-
+    public function kindergartens()
+    {
+        return $this->where(ClientsGroup::tableName().'.GroupType', '=', ClientsGroup::TYPE_KINDERGARTEN);
+    }
 }

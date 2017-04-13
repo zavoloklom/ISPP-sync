@@ -1,13 +1,14 @@
-# ISPP-SYNC
-PHP скрипт синхронизации данных между удаленным сервером и сервером ИСПП.
+# ISPP-SYNC 1.0.0
+PHP скрипт синхронизации данных между удаленным сервером и сервером ПП.
 
 [![license](https://img.shields.io/github/license/zavoloklom/ISPP-sync.svg?style=flat-square)](https://github.com/zavoloklom/ISPP-sync/LICENSE)
 [![GitHub tag](https://img.shields.io/github/release/zavoloklom/ISPP-sync.svg?style=flat-square)](https://github.com/zavoloklom/ISPP-sync/tags)
 [![CircleCI branch](https://img.shields.io/circleci/project/github/zavoloklom/ISPP-sync.svg?style=flat-square)](https://circleci.com/gh/zavoloklom/ISPP-sync)
+
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/a25e42e6-57d3-482a-aaac-8adf13127259/mini.png)](https://insight.sensiolabs.com/projects/a25e42e6-57d3-482a-aaac-8adf13127259)
+[![Codacy grade](https://img.shields.io/codacy/grade/d796fadd2074487082df2218efb5b083.svg?style=flat-square)](https://api.codacy.com/project/badge/Grade/d796fadd2074487082df2218efb5b083)
 [![Codecov](https://img.shields.io/codecov/c/github/zavoloklom/ISPP-sync.svg?style=flat-square)](https://codecov.io/gh/zavoloklom/ISPP-sync)
 [![VersionEye](https://img.shields.io/versioneye/d/zavoloklom/ISPP-sync.svg?style=flat-square)](https://www.versioneye.com/user/projects/58e7a4fe26a5bb002b54c1b5?child=summary)
-
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/16d18ca0-39f6-46b8-8f9e-d2bfe85dcaed/mini.png)](https://insight.sensiolabs.com/projects/16d18ca0-39f6-46b8-8f9e-d2bfe85dcaed)
 
 ## Установка и запуск (Windows)
 * Скачать и установить [PHP 7.1](http://php.net/downloads.php)

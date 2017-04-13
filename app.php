@@ -33,17 +33,17 @@ $sync->education = array_key_exists('education', CONFIG) ? new Education(CONFIG[
 
 // Setup notification system
 if (array_key_exists('slack', CONFIG) && is_array(CONFIG['slack']) && $notification = new SlackNotification(CONFIG['slack'], CONFIG)) {
-  $sync->notification = $notification;
-  $sync->notificationEnabled = true;
+    $sync->notification = $notification;
+    $sync->notificationEnabled = true;
 }
 
 // Проверка корректности действий и установка действия по умолчанию
 if ($argc >= 2 && in_array($argv[1], Synchronization::actionsArray())) {
-  $action = $argv[1];
+    $action = $argv[1];
 
-  // execute action
-  $sync->testConnections(CONFIG['local_server'], CONFIG['web_server']);
-  $sync->$action();
+    // execute action
+    $sync->testConnections(CONFIG['local_server'], CONFIG['web_server']);
+    $sync->$action();
 } else {
-  Helper::printHelp();
+    Helper::printHelp();
 }

@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -17,25 +17,24 @@ use Pixie\Connection;
 class IsppGroup extends ActiveRecord
 {
 
-  const STATE_INACTIVE  = 0;
-  const STATE_ACTIVE    = 1;
+    const STATE_INACTIVE  = 0;
+    const STATE_ACTIVE    = 1;
 
-  /**
-   * @inheritdoc
-   */
-  public static function getConnection()
-  {
-    return new Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
-  }
+    /**
+     * @inheritdoc
+     */
+    public static function getConnection()
+    {
+        return new Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
+    }
 
-  /**
-   * @inheritdoc
-   * @return IsppGroupQuery
-   */
-  public static function qb()
-  {
-    $qb = new IsppGroupQuery(self::getConnection());
-    return $qb->table(self::tableName());
-  }
-
+    /**
+     * @inheritdoc
+     * @return IsppGroupQuery
+     */
+    public static function qb()
+    {
+        $qb = new IsppGroupQuery(self::getConnection());
+        return $qb->table(self::tableName());
+    }
 }

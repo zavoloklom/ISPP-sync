@@ -1,7 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2017 Sergey Kupletsky
- * @license MIT
+ * @license GPL-3.0
  * @link https://github.com/zavoloklom/ISPP-sync
  */
 
@@ -18,22 +18,21 @@ use Pixie\QueryBuilder\QueryBuilderHandler;
 class IsppSync extends ActiveRecord
 {
 
-  /**
-   * @inheritdoc
-   */
-  public static function getConnection()
-  {
-    return new Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
-  }
+    /**
+     * @inheritdoc
+     */
+    public static function getConnection()
+    {
+        return new Connection(CONFIG['web_server']['adapter'], CONFIG['web_server']['options']);
+    }
 
-  /**
-   * @inheritdoc
-   * @return QueryBuilderHandler
-   */
-  public static function qb()
-  {
-    $qb = new QueryBuilderHandler(self::getConnection());
-    return $qb->table(self::tableName());
-  }
-
+    /**
+     * @inheritdoc
+     * @return QueryBuilderHandler
+     */
+    public static function qb()
+    {
+        $qb = new QueryBuilderHandler(self::getConnection());
+        return $qb->table(self::tableName());
+    }
 }
