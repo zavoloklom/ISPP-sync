@@ -7,7 +7,7 @@ PHP скрипт синхронизации данных между удален
 [![Codecov](https://img.shields.io/codecov/c/github/zavoloklom/ISPP-sync.svg?style=flat-square)](https://codecov.io/gh/zavoloklom/ISPP-sync)
 [![VersionEye](https://img.shields.io/versioneye/d/zavoloklom/ISPP-sync.svg?style=flat-square)](https://www.versioneye.com/user/projects/58e7a4fe26a5bb002b54c1b5?child=summary)
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/16d18ca0-39f6-46b8-8f9e-d2bfe85dcaed/mini.png)](https://insight.sensiolabs.com/projects/16d18ca0-39f6-46b8-8f9e-d2bfe85dcaed)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/a25e42e6-57d3-482a-aaac-8adf13127259/mini.png)](https://insight.sensiolabs.com/projects/a25e42e6-57d3-482a-aaac-8adf13127259)
 
 ## Установка и запуск (Windows)
 * Скачать и установить [PHP 7.1](http://php.net/downloads.php)
