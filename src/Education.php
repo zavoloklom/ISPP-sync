@@ -84,10 +84,10 @@ class Education
         $checkDate = date('Y-m-d', strtotime($datetime));
 
         // Проверка на выходные
-        if ($this->isSaturdayAreHoliday == true && $checkDay == 6) {
+        if ($this->isSaturdayAreHoliday === true && $checkDay == 6) {
             return true;
         }
-        if ($this->isSundayAreHoliday == true && $checkDay == 7) {
+        if ($this->isSundayAreHoliday === true && $checkDay == 7) {
             return true;
         }
 

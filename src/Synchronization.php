@@ -406,7 +406,7 @@ class Synchronization
             foreach ($dateInterval as $day) {
                 // Дальнейшее имеет смысл, только если дата является учебным днем
                 // Или если о расписании ничего неизвестно
-                if (($this->education != NULL && $this->education->checkDateAsHoliday($day->date) == true) == false) {
+                if (($this->education != NULL && $this->education->checkDateAsHoliday($day->date) === true) === false) {
                     $latecomes = IsppEvent::qb()
                         ->selectDistinct([
                             IsppEvent::tableName().'.student_system_id'
