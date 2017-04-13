@@ -26,8 +26,8 @@ class EducationUnitTest extends \Codeception\Test\Unit
 
         $this->assertSame('2016-09-01', $education->getYearStart());
         $this->assertSame('2017-05-01', $education->getYearFinish());
-        $this->assertSame(true, $education->getIsSaturdayAreHoliday());
-        $this->assertSame(true, $education->getIsSundayAreHoliday());
+        $this->assertSame(true, $education->isSaturdayAreHoliday());
+        $this->assertSame(true, $education->isSundayAreHoliday());
         $this->assertSame([], $education->getHolidays());
         $this->assertSame([], $education->getVacationIntervals());
         $this->assertSame(0, $education->getDepartmentId());
@@ -66,8 +66,8 @@ class EducationUnitTest extends \Codeception\Test\Unit
 
         $this->assertSame($options['year_start'], $education->getYearStart());
         $this->assertSame($options['year_finish'], $education->getYearFinish());
-        $this->assertSame($options['isSaturdayAreHoliday'], $education->getIsSaturdayAreHoliday());
-        $this->assertSame($options['isSundayAreHoliday'], $education->getIsSundayAreHoliday());
+        $this->assertSame($options['isSaturdayAreHoliday'], $education->isSaturdayAreHoliday());
+        $this->assertSame($options['isSundayAreHoliday'], $education->isSundayAreHoliday());
         $this->assertSame($options['holidays'], $education->getHolidays());
         $this->assertSame($options['vacationIntervals'], $education->getVacationIntervals());
         $this->assertSame($options['department_id'], $education->getDepartmentId());

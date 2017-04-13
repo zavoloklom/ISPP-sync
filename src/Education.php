@@ -145,7 +145,7 @@ class Education
     /**
      * @return bool
      */
-    public function getIsSaturdayAreHoliday(): bool
+    public function isSaturdayAreHoliday(): bool
     {
         return $this->isSaturdayAreHoliday;
     }
@@ -153,7 +153,7 @@ class Education
     /**
      * @return bool
      */
-    public function getIsSundayAreHoliday(): bool
+    public function isSundayAreHoliday(): bool
     {
         return $this->isSundayAreHoliday;
     }
